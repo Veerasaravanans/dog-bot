@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOG-BOT | Tactical Command Interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+    <div class="dashboard">
+
+        <!-- ═══════════════════════════════════════════════════════════════
+             TOP STATUS BAR
+             ═══════════════════════════════════════════════════════════════ -->
+        <header class="status-bar">
+            <div class="logo-section">
+                <div class="logo">
+                    <div class="logo-icon">&#x1F415;</div>
+                    <span class="logo-text">DOG-BOT</span>
+                </div>
+                <span class="logo-subtitle">TACTICAL RECONNAISSANCE UNIT</span>
+            </div>
+
+            <div class="status-indicators">
+                <div class="status-item">
+                    <div class="status-dot" id="status-camera"></div>
+                    <div>
+                        <div class="status-label">CAMERA</div>
+                        <div class="status-value" id="status-camera-text">OFFLINE</div>
+                    </div>
+                </div>
+                <div class="status-item">
+                    <div class="status-dot" id="status-motor"></div>
+                    <div>
+                        <div class="status-label">MOTOR CTRL</div>
+                        <div class="status-value" id="status-motor-text">OFFLINE</div>
+                    </div>
+                </div>
+                <div class="status-item">
+                    <div class="status-dot offline" id="status-ai"></div>
+                    <div>
+                        <div class="status-label">AI ENGINE</div>
+                        <div class="status-value" id="status-ai-text">STANDBY</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="datetime">
+                <span id="time">--:--:--</span>
+                <span class="date" id="date">----.--.--</span>
+            </div>
+        </header>
+
+        <!-- ═══════════════════════════════════════════════════════════════
+             VIDEO FEED SECTION
+             ═══════════════════════════════════════════════════════════════ -->
+        <main class="video-section">
+            <div class="video-container">
+                <div class="video-feed no-signal" id="videoFeed">
+                    <!-- Live feed image (hidden until stream connects) -->
+                    <img id="videoImg" alt="Video Feed" style="display:none;" />
+
+                    <!-- Grid Overlay -->
+                    <div class="grid-overlay">
+                        <svg viewBox="0 0 640 480" preserveAspectRatio="none">
+                            <line x1="320" y1="140" x2="0" y2="480" stroke="#00ff9d" stroke-width="1" opacity="0.4"/>
+                            <line x1="320" y1="140" x2="160" y2="480" stroke="#00ff9d" stroke-width="1" opacity="0.4"/>
+                            <line x1="320" y1="140" x2="320" y2="480" stroke="#00ff9d" stroke-width="1.5" opacity="0.6"/>
+                            <line x1="320" y1="140" x2="480" y2="480" stroke="#00ff9d" stroke-width="1" opacity="0.4"/>
+                            <line x1="320" y1="140" x2="640" y2="480" stroke="#00ff9d" stroke-width="1" opacity="0.4"/>
+                            <line x1="100" y1="380" x2="540" y2="380" stroke="#00ff9d" stroke-width="1" opacity="0.3"/>
+                            <line x1="150" y1="320" x2="490" y2="320" stroke="#00ff9d" stroke-width="1" opacity="0.3"/>
+                            <line x1="200" y1="260" x2="440" y2="260" stroke="#00ff9d" stroke-width="1" opacity="0.3"/>
+                            <line x1="250" y1="200" x2="390" y2="200" stroke="#00ff9d" stroke-width="1" opacity="0.3"/>
+                        </svg>
+                    </div>
+
+                    <!-- Corner Brackets -->
+                    <div class="corner-bracket top-left"></div>
+                    <div class="corner-bracket top-right"></div>
+                    <div class="corner-bracket bottom-left"></div>
+                    <div class="corner-bracket bottom-right"></div>
+
+                    <!-- Crosshair -->
+                    <div class="crosshair">
+                        <div class="crosshair-circle"></div>
+                        <div class="crosshair-dot"></div>
+                    </div>
+
+                    <!-- Distance Markers -->
+                    <div class="distance-marker m1">0.5m</div>
+                    <div class="distance-marker m2">1.0m</div>
+                    <div class="distance-marker m3">2.0m</div>
+
+                    <!-- HUD Overlay -->
+                    <div class="hud-overlay">
+                        <div class="hud-top">
+                            <div class="hud-item">
+                                <span class="hud-label">FPS</span>
+                                <span class="hud-value" id="hud-fps">0.0</span>
+                            </div>
+                            <div class="hud-item">
+                                <span class="hud-label">LATENCY</span>
+                                <span class="hud-value" id="hud-latency">--<small>ms</small></span>
+                            </div>
+                            <div class="hud-item">
+                                <span class="hud-label">MODE</span>
+                                <span class="hud-value" id="hud-mode">MANUAL</span>
+                            </div>
+                            <div class="hud-item">
+                                <span class="hud-label">OBSTACLES</span>
+                                <span class="hud-value" id="hud-obstacles">0</span>
+                            </div>
+                            <div class="hud-item">
+                                <span class="hud-label">EVIDENCE</span>
+                                <span class="hud-value" id="hud-evidence">0</span>
+                            </div>
+                        </div>
+
+                        <!-- Evidence Alert -->
+                        <div class="evidence-alert hidden" id="evidenceAlert">
+                            <span class="evidence-alert-icon">&#x26A0;&#xFE0F;</span>
+                            <span class="evidence-alert-text" id="evidenceAlertText">EVIDENCE DETECTED</span>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Recommendation -->
+                    <div class="nav-recommendation hidden" id="navRecommendation">
+                        <span class="nav-arrow" id="navArrow">&#8594;</span>
+                        <span class="nav-text" id="navText">--</span>
+                        <span class="nav-confidence" id="navConf">CONF: --</span>
+                    </div>
+
+                    <!-- Compass -->
+                    <div class="compass">
+                        <div class="compass-inner">
+                            <div class="compass-needle"></div>
+                            <span class="compass-n">N</span>
+                        </div>
+                    </div>
+
+                    <!-- Recording Indicator -->
+                    <div class="recording-indicator">
+                        <div class="recording-dot"></div>
+                        <span class="recording-text">REC</span>
+                        <span class="recording-time" id="recTime">00:00:00</span>
+                    </div>
+
+                    <!-- Mini Map -->
+                    <div class="minimap">
+                        <div class="minimap-grid">
+                            <canvas id="minimapTrail" width="120" height="120" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;pointer-events:none;"></canvas>
+                            <div class="minimap-obstacle" id="miniObs1" style="top:30%;left:25%;display:none;"></div>
+                            <div class="minimap-obstacle" id="miniObs2" style="top:60%;right:20%;display:none;"></div>
+                            <div class="minimap-evidence" id="miniEvd1" style="top:45%;right:35%;display:none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="quick-stats">
+                        <div class="quick-stat">
+                            <span class="quick-stat-icon">&#x1F4CF;</span>
+                            <span class="quick-stat-value" id="stat-distance">0.0m</span>
+                        </div>
+                        <div class="quick-stat">
+                            <span class="quick-stat-icon">&#x1F550;</span>
+                            <span class="quick-stat-value" id="stat-uptime">00:00:00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- ═══════════════════════════════════════════════════════════════
+             RIGHT CONTROL PANEL
+             ═══════════════════════════════════════════════════════════════ -->
+        <aside class="right-panel">
+
+            <!-- Mode Toggle -->
+            <div class="mode-section">
+                <div class="mode-toggle">
+                    <button class="mode-btn active" id="manualBtn" data-mode="manual">
+                        <span>&#x1F3AE;</span> MANUAL
+                    </button>
+                    <button class="mode-btn" id="autoBtn" data-mode="semi_auto">
+                        <span>&#x1F916;</span> SEMI-AUTO
+                    </button>
+                    <button class="mode-btn" id="searchBtn" data-mode="search">
+                        <span>&#x1F50D;</span> SEARCH
+                    </button>
+                </div>
+            </div>
+
+            <!-- Control Section -->
+            <div class="panel-section control-section">
+                <div class="panel-header">
+                    <span class="panel-title">MOVEMENT CONTROL</span>
+                </div>
+
+                <!-- D-Pad -->
+                <div class="dpad-container">
+                    <div class="dpad">
+                        <div class="dpad-btn empty"></div>
+                        <button class="dpad-btn" id="btnForward" data-dir="forward">&#9650;</button>
+                        <div class="dpad-btn empty"></div>
+
+                        <button class="dpad-btn" id="btnLeft" data-dir="left">&#9664;</button>
+                        <button class="dpad-btn center" id="btnStop" data-dir="stop"><span>STOP</span></button>
+                        <button class="dpad-btn" id="btnRight" data-dir="right">&#9654;</button>
+
+                        <div class="dpad-btn empty"></div>
+                        <button class="dpad-btn" id="btnBackward" data-dir="back">&#9660;</button>
+                        <div class="dpad-btn empty"></div>
+                    </div>
+                </div>
+
+                <!-- Speed Control -->
+                <div class="speed-control">
+                    <div class="speed-header">
+                        <span class="speed-label">SPEED</span>
+                        <span class="speed-value" id="speedValue">180</span>
+                    </div>
+                    <div class="speed-slider-container">
+                        <input type="range" class="speed-slider" id="speedSlider" min="50" max="255" value="180">
+                    </div>
+                    <div class="speed-marks">
+                        <span class="speed-mark">50</span>
+                        <span class="speed-mark">150</span>
+                        <span class="speed-mark">255</span>
+                    </div>
+                </div>
+
+                <!-- Gauges -->
+                <div class="gauge-container">
+                    <div class="gauge">
+                        <svg viewBox="0 0 70 70">
+                            <circle class="gauge-bg" cx="35" cy="35" r="30"/>
+                            <circle class="gauge-fill" cx="35" cy="35" r="30" id="gaugeCpu"/>
+                        </svg>
+                        <div class="gauge-value">
+                            <div class="gauge-number" id="gaugeCpuVal">--%</div>
+                            <div class="gauge-label">CPU</div>
+                        </div>
+                    </div>
+                    <div class="gauge">
+                        <svg viewBox="0 0 70 70">
+                            <circle class="gauge-bg" cx="35" cy="35" r="30"/>
+                            <circle class="gauge-fill warning" cx="35" cy="35" r="30" id="gaugeMem" style="stroke-dashoffset:75;"/>
+                        </svg>
+                        <div class="gauge-value">
+                            <div class="gauge-number" id="gaugeMemVal">--%</div>
+                            <div class="gauge-label">MEM</div>
+                        </div>
+                    </div>
+                    <div class="gauge">
+                        <svg viewBox="0 0 70 70">
+                            <circle class="gauge-bg" cx="35" cy="35" r="30"/>
+                            <circle class="gauge-fill" cx="35" cy="35" r="30" id="gaugeBat" style="stroke-dashoffset:28;"/>
+                        </svg>
+                        <div class="gauge-value">
+                            <div class="gauge-number" id="gaugeBatVal">--%</div>
+                            <div class="gauge-label">BAT</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lane Status -->
+            <div class="lane-section">
+                <div class="panel-header">
+                    <span class="panel-title">LANE STATUS</span>
+                </div>
+                <div class="lane-status">
+                    <div class="lane clear" id="laneLeft">
+                        <div class="lane-label">LEFT</div>
+                        <div class="lane-icon">&#10003;</div>
+                    </div>
+                    <div class="lane clear" id="laneCenter">
+                        <div class="lane-label">CENTER</div>
+                        <div class="lane-icon">&#10003;</div>
+                    </div>
+                    <div class="lane clear" id="laneRight">
+                        <div class="lane-label">RIGHT</div>
+                        <div class="lane-icon">&#10003;</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Reasoning Log -->
+            <div class="panel-section log-section">
+                <div class="panel-header">
+                    <span class="panel-title">AI REASONING LOG</span>
+                </div>
+                <div class="log-container" id="logContainer">
+                    <div class="log-entry act">
+                        <span class="log-time">--:--:--</span>
+                        <span class="log-type act">[ACT]</span>
+                        <span class="log-message">System initialized. Awaiting connection...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Keyboard Hints -->
+            <div class="keyboard-hints">
+                <div class="keyboard-row">
+                    <div class="key">W</div>
+                </div>
+                <div class="keyboard-row">
+                    <div class="key">A</div>
+                    <div class="key">S</div>
+                    <div class="key">D</div>
+                </div>
+                <div class="keyboard-row">
+                    <div class="key wide">SPACE</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ═══════════════════════════════════════════════════════════════
+             BOTTOM TELEMETRY BAR
+             ═══════════════════════════════════════════════════════════════ -->
+        <footer class="telemetry-bar">
+            <div class="telemetry-group">
+                <div class="telemetry-item">
+                    <span class="telemetry-label">SIGNAL</span>
+                    <div class="signal-bars" id="signalBars">
+                        <div class="signal-bar inactive"></div>
+                        <div class="signal-bar inactive"></div>
+                        <div class="signal-bar inactive"></div>
+                        <div class="signal-bar inactive"></div>
+                        <div class="signal-bar inactive"></div>
+                    </div>
+                </div>
+                <div class="telemetry-item">
+                    <span class="telemetry-label">RSSI</span>
+                    <span class="telemetry-value" id="telem-rssi">--<span class="telemetry-unit">dBm</span></span>
+                </div>
+            </div>
+
+            <div class="telemetry-group">
+                <div class="telemetry-item">
+                    <span class="telemetry-label">BATTERY</span>
+                    <div class="battery">
+                        <div class="battery-icon" id="batteryIcon">
+                            <div class="battery-level" id="batteryLevel" style="width:0%;"></div>
+                        </div>
+                        <span class="telemetry-value" id="telem-voltage">--<span class="telemetry-unit">V</span></span>
+                    </div>
+                </div>
+                <div class="telemetry-item">
+                    <span class="telemetry-label">CURRENT</span>
+                    <span class="telemetry-value" id="telem-current">--<span class="telemetry-unit">A</span></span>
+                </div>
+            </div>
+
+            <div class="telemetry-group">
+                <div class="telemetry-item">
+                    <span class="telemetry-label">SPEED</span>
+                    <span class="telemetry-value" id="telem-speed">0.0<span class="telemetry-unit">m/s</span></span>
+                </div>
+                <div class="telemetry-item">
+                    <span class="telemetry-label">DIRECTION</span>
+                    <span class="telemetry-value" id="telem-direction">STOP</span>
+                </div>
+            </div>
+
+            <div class="telemetry-group">
+                <div class="telemetry-item">
+                    <span class="telemetry-label">OBSTACLES</span>
+                    <span class="telemetry-value" id="telem-obstacles">0</span>
+                </div>
+                <div class="telemetry-item">
+                    <span class="telemetry-label">EVIDENCE</span>
+                    <span class="telemetry-value" id="telem-evidence">0</span>
+                </div>
+                <div class="telemetry-item">
+                    <span class="telemetry-label">UPTIME</span>
+                    <span class="telemetry-value" id="telem-uptime">00:00:00</span>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-btn" id="btnSnapshot">
+                    <span>&#x1F4F7;</span> SNAPSHOT
+                </button>
+                <button class="action-btn" id="btnSaveLog">
+                    <span>&#x1F4BE;</span> SAVE LOG
+                </button>
+                <button class="action-btn danger" id="btnEstop">
+                    <span>&#x1F6D1;</span> E-STOP
+                </button>
+            </div>
+        </footer>
+
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/controls.js"></script>
+    <script src="/static/js/panels.js"></script>
+</body>
+</html>

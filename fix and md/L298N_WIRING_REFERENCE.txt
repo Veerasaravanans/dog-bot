@@ -1,0 +1,181 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                    L298N MOTOR DRIVER WIRING REFERENCE                        ║
+║                         DogBot Recon System                                   ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ CRITICAL: REMOVE BOTH ENABLE JUMPERS ON L298N BEFORE CONNECTING GPIO 2 & 4 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                          ESP32-CAM PINOUT                                   ┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃  Left Header (Top to Bottom):                                               ┃
+┃  ┌─────────────────────────────────────────────────────────────┐            ┃
+┃  │  5V  ──────────────► L298N +5V (Logic Power) [RED]         │            ┃
+┃  │  GND ──────────────► L298N GND (Ground) [BLACK]            │            ┃
+┃  │  IO12 ─────────────► L298N IN1 (Left Motor Dir) [BLUE]    │            ┃
+┃  │  IO13 ─────────────► L298N IN2 (Left Motor Dir) [GREEN]   │            ┃
+┃  │  IO15 ─────────────► L298N IN4 (Right Motor Dir) [YELLOW] │            ┃
+┃  │  IO14 ─────────────► L298N IN3 (Right Motor Dir) [PURPLE] │            ┃
+┃  │  IO2  ─────────────► L298N ENA (Left Motor Speed) [ORANGE]│ ⚠️ PWM     ┃
+┃  │  IO4  ─────────────► L298N ENB (Right Motor Speed) [LT BLUE] ⚠️ PWM    ┃
+┃  └─────────────────────────────────────────────────────────────┘            ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                          L298N DRIVER MODULE                                ┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃                                                                             ┃
+┃   POWER INPUT:                                                              ┃
+┃   ┌──────────────────────────────────────┐                                 ┃
+┃   │  +12V ◄──────── Battery + (6V) [DARK RED]                              ┃
+┃   │  GND  ◄──────── Battery - [BLACK]                                      ┃
+┃   │  +5V  ◄──────── ESP32 5V [RED]                                         ┃
+┃   └──────────────────────────────────────┘                                 ┃
+┃                                                                             ┃
+┃   MOTOR A (LEFT):                           ⚠️ REMOVE JUMPER               ┃
+┃   ┌──────────────────────────────────────┐                                 ┃
+┃   │  OUT1 ──► Left Motors (+)                                              ┃
+┃   │  OUT2 ──► Left Motors (-)                                              ┃
+┃   │  IN1  ◄── GPIO 12 [BLUE]                                               ┃
+┃   │  IN2  ◄── GPIO 13 [GREEN]                                              ┃
+┃   │  ENA  ◄── GPIO 2 [ORANGE] ⚡ PWM SPEED CONTROL                         ┃
+┃   └──────────────────────────────────────┘                                 ┃
+┃                                                                             ┃
+┃   MOTOR B (RIGHT):                          ⚠️ REMOVE JUMPER               ┃
+┃   ┌──────────────────────────────────────┐                                 ┃
+┃   │  OUT3 ──► Right Motors (+)                                             ┃
+┃   │  OUT4 ──► Right Motors (-)                                             ┃
+┃   │  IN3  ◄── GPIO 14 [PURPLE]                                             ┃
+┃   │  IN4  ◄── GPIO 15 [YELLOW]                                             ┃
+┃   │  ENB  ◄── GPIO 4 [LIGHT BLUE] ⚡ PWM SPEED CONTROL                     ┃
+┃   └──────────────────────────────────────┘                                 ┃
+┃                                                                             ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                          BATTERY PACK (4x AA)                               ┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃   ┌──────────────────────────────────────┐                                 ┃
+┃   │  + (Red) ──────► L298N +12V [DARK RED]                                 ┃
+┃   │  - (Black) ────► L298N GND [BLACK]                                     ┃
+┃   └──────────────────────────────────────┘                                 ┃
+┃   Voltage: 6V nominal (1.5V × 4)                                            ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                        COMPLETE CONNECTION TABLE                            ┃
+┣━━━━━━━━━━━━━━━━━━━━┯━━━━━━━━━━━━━━━━━┯━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃  ESP32-CAM Pin     │  L298N Pin      │  Function                        ┃
+┣━━━━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃  GPIO 12 [BLUE]    │  IN1            │  Left motor direction (fwd/rev)  ┃
+┃  GPIO 13 [GREEN]   │  IN2            │  Left motor direction (fwd/rev)  ┃
+┃  GPIO 14 [PURPLE]  │  IN3            │  Right motor direction (fwd/rev) ┃
+┃  GPIO 15 [YELLOW]  │  IN4            │  Right motor direction (fwd/rev) ┃
+┃  GPIO 2 [ORANGE]   │  ENABLE A ⚡    │  Left motor PWM speed (0-255)    ┃
+┃  GPIO 4 [LT BLUE]  │  ENABLE B ⚡    │  Right motor PWM speed (0-255)   ┃
+┃  5V [RED]          │  +5V            │  Logic power supply              ┃
+┃  GND [BLACK]       │  GND            │  Common ground                   ┃
+┣━━━━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃  Battery + [D.RED] │  +12V           │  Motor power (6V input)          ┃
+┃  Battery - [BLACK] │  GND            │  Motor ground                    ┃
+┗━━━━━━━━━━━━━━━━━━━━┷━━━━━━━━━━━━━━━━━┷━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                           ⚠️ CRITICAL WARNINGS ⚠️                          ┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃                                                                             ┃
+┃  1. REMOVE ENABLE JUMPERS BEFORE CONNECTING GPIO 2 & 4                     ┃
+┃     ► The L298N ships with jumpers on ENABLE A and ENABLE B                ┃
+┃     ► These jumpers tie ENABLE pins to 5V (full speed, no PWM)             ┃
+┃     ► You MUST physically remove both jumpers for PWM control              ┃
+┃                                                                             ┃
+┃  2. CONNECT ALL GROUNDS TOGETHER                                           ┃
+┃     ► ESP32 GND, L298N GND, Battery - must be common                       ┃
+┃     ► This prevents voltage spikes and ensures proper operation            ┃
+┃                                                                             ┃
+┃  3. VERIFY MOTOR POLARITY                                                  ┃
+┃     ► Test each motor direction before final assembly                      ┃
+┃     ► Swap motor wires at L298N if direction is reversed                   ┃
+┃                                                                             ┃
+┃  4. CHECK BATTERY VOLTAGE                                                  ┃
+┃     ► 4x AA batteries = 6V nominal (5.2V-6.4V range)                       ┃
+┃     ► L298N accepts 5V-35V on +12V input                                   ┃
+┃     ► Below 5V: motors may not run; Above 7V: use L298N's 5V regulator     ┃
+┃                                                                             ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                              QUICK TEST                                     ┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃                                                                             ┃
+┃  After uploading firmware and wiring, test with HTTP commands:             ┃
+┃                                                                             ┃
+┃  Slow speed (40%):                                                          ┃
+┃    http://192.168.x.x/motor?dir=forward&speed=100                           ┃
+┃                                                                             ┃
+┃  Medium speed (60%):                                                        ┃
+┃    http://192.168.x.x/motor?dir=forward&speed=150                           ┃
+┃                                                                             ┃
+┃  Full speed (100%):                                                         ┃
+┃    http://192.168.x.x/motor?dir=forward&speed=255                           ┃
+┃                                                                             ┃
+┃  Stop:                                                                      ┃
+┃    http://192.168.x.x/motor?dir=stop                                        ┃
+┃                                                                             ┃
+┃  Expected: You should hear/see the motor speed change between commands     ┃
+┃  If not: Check that ENABLE jumpers are removed from L298N                  ┃
+┃                                                                             ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                           PWM SPECIFICATIONS                                ┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃  Frequency:        1000 Hz (1 kHz) - inaudible, smooth operation           ┃
+┃  Resolution:       8-bit (0-255)                                            ┃
+┃  LEDC Channel A:   0 (GPIO 2 → ENABLE A)                                   ┃
+┃  LEDC Channel B:   1 (GPIO 4 → ENABLE B)                                   ┃
+┃                                                                             ┃
+┃  Speed Mapping:                                                             ┃
+┃    0   = Full stop (0% duty cycle)                                          ┃
+┃    64  = 25% speed (25% duty cycle)                                         ┃
+┃    128 = 50% speed (50% duty cycle)                                         ┃
+┃    192 = 75% speed (75% duty cycle)                                         ┃
+┃    255 = Full speed (100% duty cycle)                                       ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                         TROUBLESHOOTING GUIDE                               ┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃                                                                             ┃
+┃  ❌ Motors run at full speed regardless of speed parameter                 ┃
+┃     ► ENABLE jumpers still installed → Remove them!                        ┃
+┃                                                                             ┃
+┃  ❌ Motors don't move at all                                               ┃
+┃     ► Check ENABLE A/B connections (GPIO 2 & 4)                            ┃
+┃     ► Verify battery power (should be ~6V)                                 ┃
+┃     ► Check IN1-IN4 direction pin connections                              ┃
+┃                                                                             ┃
+┃  ❌ Motors spin in wrong direction                                         ┃
+┃     ► Swap the two motor wires at L298N screw terminals                    ┃
+┃                                                                             ┃
+┃  ❌ L298N gets very hot (>80°C)                                            ┃
+┃     ► Normal to be warm (50-70°C), but not burning hot                     ┃
+┃     ► Check for motor stall or mechanical binding                          ┃
+┃     ► Reduce speed or add cooling fan if needed                            ┃
+┃                                                                             ┃
+┃  ❌ Serial Monitor shows errors                                            ┃
+┃     ► Check WiFi credentials (lines 14-15 in firmware)                     ┃
+┃     ► Verify MQTT broker settings (lines 18-21 in firmware)                ┃
+┃                                                                             ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  For complete documentation, see: L298N_UPGRADE_GUIDE.md                    │
+│  Pin diagram visual: http://localhost:8000/pin-diagram                      │
+│  Dashboard: http://localhost:8000                                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                            ⚡ PWM SPEED CONTROL ENABLED ⚡
+                         DogBot Recon System - L298N Driver

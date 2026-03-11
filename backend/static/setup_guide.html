@@ -1,0 +1,2091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DOG-BOT // SETUP GUIDE</title>
+<style>
+:root {
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #111111;
+    --bg-card: #151515;
+    --border-color: #222222;
+    --border-bright: #333333;
+    --green-primary: #00ff41;
+    --green-glow: rgba(0, 255, 65, 0.2);
+    --orange-warn: #ff6600;
+    --red-critical: #ff0000;
+    --blue-info: #00bfff;
+    --text-primary: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --text-dim: #666666;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+@keyframes glow {
+    0%, 100% { box-shadow: 0 0 5px var(--green-glow); }
+    50% { box-shadow: 0 0 20px var(--green-glow), 0 0 30px var(--green-glow); }
+}
+
+@keyframes slideDown {
+    from { max-height: 0; opacity: 0; }
+    to { max-height: 5000px; opacity: 1; }
+}
+
+@keyframes wireConnect {
+    from { stroke-dashoffset: 1000; }
+    to { stroke-dashoffset: 0; }
+}
+
+body {
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* Animated background grid */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    pointer-events: none;
+    z-index: 0;
+    animation: pulse 4s ease-in-out infinite;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px 40px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Top Navigation Bar */
+.top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg-secondary);
+    border-bottom: 2px solid var(--green-primary);
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0, 255, 65, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.back-link {
+    color: var(--green-primary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 8px 16px;
+    border: 1px solid var(--green-primary);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.back-link:hover {
+    background: var(--green-glow);
+    box-shadow: 0 0 15px var(--green-glow);
+    transform: translateX(-5px);
+}
+
+.top-bar-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--green-primary);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px var(--green-glow);
+}
+
+/* Hero Section */
+.hero {
+    text-align: center;
+    padding: 60px 20px 40px;
+    background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+    border-radius: 12px;
+    margin: 20px 0 40px;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.hero h1 {
+    font-size: 42px;
+    color: var(--green-primary);
+    text-transform: uppercase;
+    letter-spacing: 6px;
+    margin-bottom: 12px;
+    text-shadow: 0 0 30px var(--green-glow);
+    font-weight: 700;
+}
+
+.hero .subtitle {
+    font-size: 16px;
+    color: var(--text-secondary);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* Progress Tracker */
+.progress-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    animation: fadeIn 1s ease-out 0.2s both;
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.progress-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.progress-count {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--green-primary);
+}
+
+.progress-track {
+    height: 12px;
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green-primary), #00cc33);
+    border-radius: 6px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0%;
+    box-shadow: 0 0 15px var(--green-glow);
+    position: relative;
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Phase Cards */
+.phase {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    margin-bottom: 24px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+    animation: fadeIn 0.6s ease-out backwards;
+}
+
+.phase:nth-child(1) { animation-delay: 0.1s; }
+.phase:nth-child(2) { animation-delay: 0.2s; }
+.phase:nth-child(3) { animation-delay: 0.3s; }
+.phase:nth-child(4) { animation-delay: 0.4s; }
+.phase:nth-child(5) { animation-delay: 0.5s; }
+
+.phase:hover {
+    border-color: var(--green-primary);
+    box-shadow: 0 6px 20px rgba(0, 255, 65, 0.15);
+    transform: translateY(-2px);
+}
+
+.phase-header {
+    display: flex;
+    align-items: center;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.phase-header:hover {
+    background: linear-gradient(135deg, #1a1a1a 0%, var(--bg-card) 100%);
+}
+
+.phase-arrow {
+    color: var(--green-primary);
+    font-size: 20px;
+    margin-right: 16px;
+    transition: transform 0.3s ease;
+    width: 24px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.phase.collapsed .phase-arrow {
+    transform: rotate(-90deg);
+}
+
+.phase-number {
+    background: var(--green-primary);
+    color: var(--bg-primary);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 6px;
+    margin-right: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.phase-title {
+    flex: 1;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.phase-step-count {
+    font-size: 13px;
+    color: var(--text-dim);
+    background: var(--bg-primary);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.phase-body {
+    max-height: 5000px;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
+    padding: 24px;
+}
+
+.phase.collapsed .phase-body {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/* Step Items */
+.step {
+    display: flex;
+    align-items: flex-start;
+    padding: 20px;
+    margin-bottom: 16px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.step:hover {
+    border-color: var(--border-bright);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.step:last-child {
+    margin-bottom: 0;
+}
+
+.step-checkbox {
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    border: 2px solid var(--border-bright);
+    background: var(--bg-primary);
+    cursor: pointer;
+    margin-right: 16px;
+    margin-top: 2px;
+    position: relative;
+    transition: all 0.3s ease;
+    border-radius: 6px;
+}
+
+.step-checkbox:hover {
+    border-color: var(--green-primary);
+    box-shadow: 0 0 8px var(--green-glow);
+}
+
+.step-checkbox:checked {
+    border-color: var(--green-primary);
+    background: var(--green-primary);
+    animation: glow 0.5s ease;
+}
+
+.step-checkbox:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--bg-primary);
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.step-number {
+    color: var(--green-primary);
+    font-size: 14px;
+    font-weight: 700;
+    min-width: 32px;
+    margin-right: 12px;
+    margin-top: 2px;
+}
+
+.step-content {
+    flex: 1;
+}
+
+.step-content p {
+    margin-bottom: 12px;
+    line-height: 1.8;
+}
+
+.step-content strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.step.completed .step-content {
+    opacity: 0.5;
+}
+
+/* Sub-steps */
+.sub-steps {
+    margin: 12px 0 12px 24px;
+    color: var(--text-secondary);
+    list-style: none;
+}
+
+.sub-steps li {
+    margin-bottom: 8px;
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.7;
+}
+
+.sub-steps li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--green-primary);
+    font-weight: bold;
+}
+
+/* Code Blocks */
+.code-block {
+    position: relative;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-bright);
+    border-left: 4px solid var(--green-primary);
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    color: var(--green-primary);
+    overflow-x: auto;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.code-block .copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--green-primary);
+    color: var(--green-primary);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 12px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+}
+
+.code-block .copy-btn:hover {
+    background: var(--green-primary);
+    color: var(--bg-primary);
+    box-shadow: 0 0 10px var(--green-glow);
+}
+
+.copy-btn.flash {
+    background: var(--green-primary);
+    color: var(--bg-primary);
+}
+
+/* Inline code */
+code {
+    background: var(--bg-primary);
+    color: var(--green-primary);
+    padding: 3px 8px;
+    font-size: 13px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+}
+
+/* Callouts */
+.callout {
+    border-left: 4px solid;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 14px;
+    border-radius: 6px;
+    backdrop-filter: blur(10px);
+}
+
+.callout-info {
+    border-color: var(--blue-info);
+    background: rgba(0, 191, 255, 0.1);
+    color: #90d8ff;
+}
+
+.callout-warning {
+    border-color: var(--orange-warn);
+    background: rgba(255, 102, 0, 0.1);
+    color: #ffaa66;
+}
+
+.callout-critical {
+    border-color: var(--red-critical);
+    background: rgba(255, 0, 0, 0.1);
+    color: #ff6666;
+}
+
+.callout-icon {
+    margin-right: 8px;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+/* Wiring Diagram */
+.wiring-diagram {
+    background: var(--bg-primary);
+    border: 2px solid var(--green-primary);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--green-primary);
+    overflow-x: auto;
+    white-space: pre;
+    box-shadow: 0 0 20px var(--green-glow);
+}
+
+/* Wiring Table */
+.wiring-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 14px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.wiring-table th {
+    background: var(--green-primary);
+    color: var(--bg-primary);
+    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 12px 16px;
+    text-align: left;
+}
+
+.wiring-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.wiring-table tr:hover td {
+    background: var(--bg-card);
+}
+
+.wiring-table tr.critical td {
+    background: rgba(255, 0, 0, 0.1);
+    color: #ff6666;
+    font-weight: 600;
+}
+
+/* Pin Diagram Link */
+.pin-link {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--green-primary) 0%, #00cc33 100%);
+    color: var(--bg-primary);
+    padding: 12px 24px;
+    margin: 16px 0;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 255, 65, 0.3);
+}
+
+.pin-link:hover {
+    box-shadow: 0 6px 20px rgba(0, 255, 65, 0.5);
+    transform: translateY(-2px);
+}
+
+/* SVG Wiring Diagram Container */
+.svg-diagram-container {
+    background: var(--bg-primary);
+    border: 2px solid var(--green-primary);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 24px 0;
+    box-shadow: 0 0 30px var(--green-glow);
+    overflow-x: auto;
+}
+
+.svg-diagram {
+    width: 100%;
+    max-width: 900px;
+    height: auto;
+    margin: 0 auto;
+    display: block;
+}
+
+/* Arduino Board Styles */
+.arduino-board {
+    fill: #006080;
+    stroke: #004060;
+    stroke-width: 2;
+}
+
+.esp32-board {
+    fill: #1a1a1a;
+    stroke: #333;
+    stroke-width: 2;
+}
+
+.pin-header {
+    fill: #222;
+    stroke: #444;
+    stroke-width: 1;
+}
+
+.pin {
+    fill: #ffd700;
+    stroke: #cc9900;
+    stroke-width: 1;
+    transition: all 0.3s ease;
+}
+
+.pin:hover {
+    fill: var(--green-primary);
+    filter: drop-shadow(0 0 5px var(--green-primary));
+}
+
+.wire {
+    fill: none;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: wireConnect 1.5s ease-out forwards;
+}
+
+.wire-red { stroke: #ff0000; animation-delay: 0.2s; }
+.wire-black { stroke: #000000; stroke-width: 4; animation-delay: 0.4s; }
+.wire-blue { stroke: #0066ff; animation-delay: 0.6s; }
+.wire-green { stroke: #00ff00; animation-delay: 0.8s; }
+.wire-orange { stroke: #ff6600; animation-delay: 1.0s; }
+.wire-yellow { stroke: #ffff00; animation-delay: 1.2s; }
+
+.label {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    fill: var(--green-primary);
+    font-weight: bold;
+}
+
+.component-label {
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    fill: var(--text-primary);
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container { padding: 0 12px 20px; }
+    .hero h1 { font-size: 28px; letter-spacing: 3px; }
+    .hero .subtitle { font-size: 13px; }
+    .phase-header { padding: 16px; }
+    .phase-body { padding: 16px; }
+    .step { padding: 16px; flex-direction: column; }
+    .step-checkbox { margin-bottom: 12px; }
+    .wiring-diagram { font-size: 9px; padding: 12px; }
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 40px 20px;
+    border-top: 2px solid var(--border-color);
+    margin-top: 60px;
+    color: var(--text-dim);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+</style>
+</head>
+<body>
+
+<!-- Top Navigation -->
+<div class="top-bar">
+    <div class="top-bar-title">DogBot Setup Guide</div>
+</div>
+
+<div class="container">
+    <!-- Hero Section -->
+    <div class="hero">
+        <h1>DogBot Setup Guide</h1>
+        <div class="subtitle">Complete Hardware Setup — From Zero to Robot</div>
+    </div>
+
+    <!-- Progress Tracker -->
+    <div class="progress-container">
+        <div class="progress-header">
+            <div class="progress-label">Deployment Progress</div>
+            <div class="progress-count" id="progress-text">0 of 46 steps complete</div>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+    </div>
+
+    <!-- PHASE 1: Arduino IDE Setup -->
+    <div class="phase collapsed" id="phase-1">
+        <div class="phase-header" onclick="togglePhase(this)">
+            <span class="phase-arrow">▼</span>
+            <span class="phase-number">Phase 1</span>
+            <span class="phase-title">Install Arduino IDE & Libraries</span>
+            <span class="phase-step-count">6 steps</span>
+        </div>
+        <div class="phase-body">
+            <!-- Step 1 -->
+            <div class="step" id="step-1-1">
+                <input type="checkbox" class="step-checkbox" data-phase="1" data-step="1" onchange="onCheck(this)">
+                <span class="step-number">01</span>
+                <div class="step-content">
+                    <p><strong>Download Arduino IDE 2.x</strong></p>
+                    <p>Open your web browser and navigate to the official Arduino website:</p>
+                    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>https://www.arduino.cc/en/software</div>
+                    <p>Click the <strong>"DOWNLOAD"</strong> button for Windows. The file will be approximately 150 MB.</p>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step" id="step-1-2">
+                <input type="checkbox" class="step-checkbox" data-phase="1" data-step="2" onchange="onCheck(this)">
+                <span class="step-number">02</span>
+                <div class="step-content">
+                    <p><strong>Install Arduino IDE</strong></p>
+                    <ol class="sub-steps">
+                        <li>Locate the downloaded file in your Downloads folder</li>
+                        <li>Double-click the <code>.exe</code> file to begin installation</li>
+                        <li>Click <strong>"Yes"</strong> when Windows prompts for permission</li>
+                        <li>Accept the license agreement by clicking <strong>"I Agree"</strong></li>
+                        <li>Keep all default options selected</li>
+                        <li>Click <strong>"Install"</strong> and wait for completion (2-3 minutes)</li>
+                        <li>Click <strong>"Finish"</strong> when installation completes</li>
+                    </ol>
+                    <div class="callout callout-info">
+                        <span class="callout-icon">ℹ</span>
+                        Arduino IDE will launch automatically. If Windows Firewall appears, click <strong>"Allow access"</strong>.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="step" id="step-1-3">
+                <input type="checkbox" class="step-checkbox" data-phase="1" data-step="3" onchange="onCheck(this)">
+                <span class="step-number">03</span>
+                <div class="step-content">
+                    <p><strong>Add ESP32 board support</strong></p>
+                    <ol class="sub-steps">
+                        <li>In Arduino IDE, click <strong>File</strong> → <strong>Preferences</strong></li>
+                        <li>Find the field labeled <strong>"Additional boards manager URLs"</strong></li>
+                        <li>Paste the following URL:</li>
+                    </ol>
+                    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json</div>
+                    <ol class="sub-steps" start="4">
+                        <li>Click <strong>"OK"</strong> to save</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="step" id="step-1-4">
+                <input type="checkbox" class="step-checkbox" data-phase="1" data-step="4" onchange="onCheck(this)">
+                <span class="step-number">04</span>
+                <div class="step-content">
+                    <p><strong>Install ESP32 boards package</strong></p>
+                    <ol class="sub-steps">
+                        <li>Click the <strong>Boards Manager</strong> icon in the left sidebar (second icon from top)</li>
+                        <li>Search for <code>esp32</code></li>
+                        <li>Find <strong>"esp32 by Espressif Systems"</strong></li>
+                        <li>Click <strong>"INSTALL"</strong></li>
+                        <li>Wait for installation (3-5 minutes, ~300 MB download)</li>
+                    </ol>
+                    <div class="callout callout-warning">
+                        <span class="callout-icon">⚠</span>
+                        Do not close Arduino IDE during installation. The download is large and may take several minutes.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="step" id="step-1-5">
+                <input type="checkbox" class="step-checkbox" data-phase="1" data-step="5" onchange="onCheck(this)">
+                <span class="step-number">05</span>
+                <div class="step-content">
+                    <p><strong>Install PubSubClient library (for MQTT)</strong></p>
+                    <ol class="sub-steps">
+                        <li>Click the <strong>Library Manager</strong> icon in the left sidebar (third icon from top)</li>
+                        <li>Search for <code>PubSubClient</code></li>
+                        <li>Find <strong>"PubSubClient by Nick O'Leary"</strong></li>
+                        <li>Click <strong>"INSTALL"</strong></li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Step 6 -->
+            <div class="step" id="step-1-6">
+                <input type="checkbox" class="step-checkbox" data-phase="1" data-step="6" onchange="onCheck(this)">
+                <span class="step-number">06</span>
+                <div class="step-content">
+                    <p><strong>Connect Arduino Uno to computer</strong></p>
+                    <ol class="sub-steps">
+                        <li>Take your Arduino Uno board</li>
+                        <li>Connect it to your computer using a USB A-to-B cable</li>
+                        <li>Wait 5 seconds for Windows to detect the device</li>
+                        <li>Verify the green power LED is ON</li>
+                    </ol>
+                    <div class="callout callout-info">
+                        <span class="callout-icon">ℹ</span>
+                        Arduino Uno uses standard drivers that come with Windows and Arduino IDE. No additional driver installation needed.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PHASE 2: Wiring ESP32-CAM to Arduino Uno -->
+    <div class="phase collapsed" id="phase-2">
+        <div class="phase-header" onclick="togglePhase(this)">
+            <span class="phase-arrow">▼</span>
+            <span class="phase-number">Phase 2</span>
+            <span class="phase-title">Wire ESP32-CAM to Arduino Uno for Programming</span>
+            <span class="phase-step-count">11 steps</span>
+        </div>
+        <div class="phase-body">
+            <!-- Step 1 -->
+            <div class="step" id="step-2-1">
+                <input type="checkbox" class="step-checkbox" data-phase="2" data-step="1" onchange="onCheck(this)">
+                <span class="step-number">01</span>
+                <div class="step-content">
+                    <p><strong>Why use Arduino Uno to program ESP32-CAM?</strong></p>
+                    <p>The ESP32-CAM module doesn't have a built-in USB port. We'll use the Arduino Uno as a USB-to-Serial bridge to upload firmware to the ESP32-CAM.</p>
+                    <p>The Arduino Uno will act as a "dumb passthrough" device that relays serial data between your computer and the ESP32-CAM.</p>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step" id="step-2-2">
+                <input type="checkbox" class="step-checkbox" data-phase="2" data-step="2" onchange="onCheck(this)">
+                <span class="step-number">02</span>
+                <div class="step-content">
+                    <p><strong>Gather required materials</strong></p>
+                    <ol class="sub-steps">
+                        <li>ESP32-CAM module</li>
+                        <li>Arduino Uno board (connected to computer)</li>
+                        <li>6× Female-to-male jumper wires</li>
+                        <li>1× Male-to-male jumper wire</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Step 3: Interactive SVG Wiring Diagram -->
+            <div class="step" id="step-2-3">
+                <input type="checkbox" class="step-checkbox" data-phase="2" data-step="3" onchange="onCheck(this)">
+                <span class="step-number">03</span>
+                <div class="step-content">
+                    <p><strong>Understanding the wiring diagram</strong></p>
+                    <p>Here's a visual representation of the connections:</p>
+
+                    <div class="svg-diagram-container">
+                        <svg class="svg-diagram" viewBox="0 0 1100 600" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <!-- Gradients for realistic look -->
+                                <linearGradient id="arduinoGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#00979D;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#006064;stop-opacity:1" />
+                                </linearGradient>
+                                <linearGradient id="esp32Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#2a2a2a;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#0a0a0a;stop-opacity:1" />
+                                </linearGradient>
+                                <radialGradient id="cameraGrad">
+                                    <stop offset="0%" style="stop-color:#8B7355;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#654321;stop-opacity:1" />
+                                </radialGradient>
+                                <filter id="shadow">
+                                    <feDropShadow dx="2" dy="4" stdDeviation="3" flood-opacity="0.5"/>
+                                </filter>
+                            </defs>
+
+                            <!-- ========== ARDUINO UNO ========== -->
+                            <g id="arduino-uno" filter="url(#shadow)">
+                                <!-- Main PCB -->
+                                <rect x="50" y="80" width="280" height="420" rx="8"
+                                      fill="url(#arduinoGrad)" stroke="#004D50" stroke-width="2"/>
+
+                                <!-- USB Port -->
+                                <rect x="50" y="200" width="35" height="60" rx="3" fill="#C0C0C0" stroke="#888"/>
+                                <rect x="55" y="210" width="25" height="40" fill="#1a1a1a"/>
+
+                                <!-- Power Jack -->
+                                <circle cx="90" cy="100" r="12" fill="#1a1a1a" stroke="#000"/>
+                                <circle cx="90" cy="100" r="6" fill="#C0C0C0"/>
+
+                                <!-- Main IC Chip (ATmega328P) -->
+                                <rect x="130" y="250" width="90" height="120" rx="3" fill="#1a1a1a" stroke="#000"/>
+                                <text x="175" y="315" text-anchor="middle" font-size="10" fill="#fff" font-family="monospace">ATmega328P</text>
+
+                                <!-- Crystal Oscillator -->
+                                <rect x="240" y="290" width="25" height="35" rx="2" fill="#C0C0C0" stroke="#888"/>
+
+                                <!-- Capacitors -->
+                                <circle cx="110" cy="180" r="8" fill="#8B4513" stroke="#654321"/>
+                                <circle cx="270" cy="180" r="8" fill="#8B4513" stroke="#654321"/>
+
+                                <!-- Arduino Logo Area -->
+                                <circle cx="175" cy="130" r="25" fill="#fff" opacity="0.3"/>
+                                <text x="175" y="150" text-anchor="middle" font-size="18" fill="#fff" font-family="Arial" font-weight="bold">∞</text>
+                                <text x="175" y="170" text-anchor="middle" font-size="12" fill="#fff" font-family="Arial">ARDUINO</text>
+                                <text x="175" y="185" text-anchor="middle" font-size="10" fill="#00FF41" font-family="Arial" font-weight="bold">UNO R3</text>
+
+                                <!-- Power Pin Header (left side) -->
+                                <rect x="70" y="390" width="12" height="80" fill="#1a1a1a" stroke="#000"/>
+                                <!-- Individual pins -->
+                                <circle cx="76" cy="400" r="3" fill="#ffd700" stroke="#cc9900" class="pin" data-pin="RESET"/>
+                                <text x="92" y="403" font-size="9" fill="#00FF41" font-family="monospace">RESET</text>
+
+                                <circle cx="76" cy="415" r="3" fill="#ffd700" stroke="#cc9900"/>
+                                <text x="92" y="418" font-size="9" fill="#00FF41" font-family="monospace">3.3V</text>
+
+                                <circle cx="76" cy="430" r="3" fill="#ffd700" stroke="#cc9900" class="pin" data-pin="5V"/>
+                                <text x="92" y="433" font-size="9" fill="#00FF41" font-family="monospace">5V</text>
+
+                                <circle cx="76" cy="445" r="3" fill="#ffd700" stroke="#cc9900" class="pin" data-pin="GND1"/>
+                                <text x="92" y="448" font-size="9" fill="#00FF41" font-family="monospace">GND</text>
+
+                                <circle cx="76" cy="460" r="3" fill="#ffd700" stroke="#cc9900" class="pin" data-pin="GND2"/>
+                                <text x="92" y="463" font-size="9" fill="#00FF41" font-family="monospace">GND</text>
+
+                                <!-- Digital Pin Header (right side) -->
+                                <rect x="268" y="390" width="12" height="95" fill="#1a1a1a" stroke="#000"/>
+
+                                <circle cx="274" cy="400" r="3" fill="#ffd700" stroke="#cc9900" class="pin" data-pin="RX"/>
+                                <text x="255" y="403" font-size="9" fill="#00FF41" font-family="monospace" text-anchor="end">RX (0)</text>
+
+                                <circle cx="274" cy="415" r="3" fill="#ffd700" stroke="#cc9900" class="pin" data-pin="TX"/>
+                                <text x="255" y="418" font-size="9" fill="#00FF41" font-family="monospace" text-anchor="end">TX (1)</text>
+
+                                <circle cx="274" cy="430" r="3" fill="#ffd700" stroke="#cc9900"/>
+                                <text x="255" y="433" font-size="9" fill="#00FF41" font-family="monospace" text-anchor="end">2</text>
+
+                                <circle cx="274" cy="445" r="3" fill="#ffd700" stroke="#cc9900"/>
+                                <text x="255" y="448" font-size="9" fill="#00FF41" font-family="monospace" text-anchor="end">3 PWM</text>
+                            </g>
+
+                            <!-- ========== ESP32-CAM ========== -->
+                            <g id="esp32-cam" filter="url(#shadow)">
+                                <!-- Main PCB -->
+                                <rect x="720" y="120" width="320" height="380" rx="8"
+                                      fill="url(#esp32Grad)" stroke="#1a1a1a" stroke-width="2"/>
+
+                                <!-- Camera Module -->
+                                <rect x="830" y="160" width="100" height="100" rx="4" fill="#2a2a2a" stroke="#000"/>
+                                <!-- Camera Lens -->
+                                <circle cx="880" cy="210" r="28" fill="url(#cameraGrad)" stroke="#000" stroke-width="2"/>
+                                <circle cx="880" cy="210" r="20" fill="#1a1a1a" opacity="0.8"/>
+                                <circle cx="880" cy="210" r="12" fill="#000"/>
+                                <circle cx="885" cy="205" r="3" fill="#4169E1" opacity="0.6"/>
+
+                                <!-- ESP32 Chip (under camera) -->
+                                <rect x="830" y="270" width="100" height="60" rx="3" fill="#1a1a1a" stroke="#333"/>
+                                <text x="880" y="305" text-anchor="middle" font-size="9" fill="#00FF41" font-family="monospace">ESP32-S</text>
+
+                                <!-- Antenna trace -->
+                                <path d="M 1000 160 Q 1020 170 1010 190 Q 1000 210 1020 220 Q 1040 230 1030 250"
+                                      fill="none" stroke="#ffd700" stroke-width="3"/>
+
+                                <!-- SD Card Slot -->
+                                <rect x="750" y="340" width="50" height="35" rx="2" fill="#C0C0C0" stroke="#888"/>
+                                <rect x="755" y="345" width="40" height="25" fill="#1a1a1a"/>
+
+                                <!-- Flash LED -->
+                                <circle cx="980" cy="380" r="5" fill="#ffff00" opacity="0.6" stroke="#cc9900"/>
+
+                                <!-- ESP32-CAM Label -->
+                                <text x="880" y="460" text-anchor="middle" font-size="16" fill="#fff" font-family="Arial" font-weight="bold">ESP32-CAM</text>
+                                <text x="880" y="478" text-anchor="middle" font-size="10" fill="#00FF41" font-family="monospace">(Bottom Pins)</text>
+
+                                <!-- Left Pin Header -->
+                                <rect x="735" y="200" width="12" height="200" fill="#1a1a1a" stroke="#000"/>
+
+                                <circle cx="741" cy="220" r="3" fill="#ffd700" stroke="#cc9900" class="pin" data-pin="ESP-5V"/>
+                                <text x="720" y="223" font-size="9" fill="#FF6B6B" font-family="monospace" text-anchor="end">5V</text>
+
+                                <circle cx="741" cy="245" r="3" fill="#ffd700" stroke="#cc9900" class="pin" data-pin="ESP-GND"/>
+                                <text x="720" y="248" font-size="9" fill="#888" font-family="monospace" text-anchor="end">GND</text>
+
+                                <circle cx="741" cy="270" r="3" fill="#ffd700" stroke="#cc9900"/>
+                                <text x="720" y="273" font-size="9" fill="#00FF41" font-family="monospace" text-anchor="end">GPIO12</text>
+
+                                <circle cx="741" cy="295" r="3" fill="#ffd700" stroke="#cc9900"/>
+                                <text x="720" y="298" font-size="9" fill="#00FF41" font-family="monospace" text-anchor="end">GPIO13</text>
+
+                                <!-- Right Pin Header -->
+                                <rect x="1013" y="200" width="12" height="200" fill="#1a1a1a" stroke="#000"/>
+
+                                <circle cx="1019" cy="220" r="3" fill="#ffd700" stroke="#cc9900"/>
+                                <text x="1030" y="223" font-size="9" fill="#00FF41" font-family="monospace">3.3V</text>
+
+                                <circle cx="1019" cy="245" r="3" fill="#ffd700" stroke="#cc9900"/>
+                                <text x="1030" y="248" font-size="9" fill="#00FF41" font-family="monospace">GPIO16</text>
+
+                                <circle cx="1019" cy="270" r="3" fill="#ffd700" stroke="#cc9900" class="pin" data-pin="ESP-U0R"/>
+                                <text x="1030" y="273" font-size="9" fill="#00BFFF" font-family="monospace" font-weight="bold">U0R (RX)</text>
+
+                                <circle cx="1019" cy="295" r="3" fill="#ffd700" stroke="#cc9900" class="pin" data-pin="ESP-U0T"/>
+                                <text x="1030" y="298" font-size="9" fill="#7FFF00" font-family="monospace" font-weight="bold">U0T (TX)</text>
+
+                                <circle cx="1019" cy="320" r="3" fill="#ffd700" stroke="#cc9900"/>
+                                <text x="1030" y="323" font-size="9" fill="#888" font-family="monospace">GND</text>
+
+                                <circle cx="1019" cy="345" r="3" fill="#ffd700" stroke="#cc9900" class="pin" data-pin="ESP-IO0"/>
+                                <text x="1030" y="348" font-size="9" fill="#FF6600" font-family="monospace" font-weight="bold">IO0</text>
+                            </g>
+
+                            <!-- ========== JUMPER WIRES WITH NUMBERED CONNECTIONS ========== -->
+
+                            <!-- Wire 1: RESET to GND (male-to-male, gray/black) -->
+                            <!-- Shadow layer -->
+                            <path d="M 76 400 C 76 400, 150 365, 190 365 C 230 365, 230 420, 200 440 C 180 450, 120 450, 76 445"
+                                  fill="none" stroke="#000" stroke-width="6" opacity="0.3"/>
+                            <!-- Main wire -->
+                            <path class="wire wire-black" d="M 76 400 C 76 400, 150 365, 190 365 C 230 365, 230 420, 200 440 C 180 450, 120 450, 76 445"
+                                  stroke="#555" stroke-width="4"/>
+                            <!-- Wire number marker circles at both ends -->
+                            <circle cx="76" cy="400" r="12" fill="#fff" stroke="#000" stroke-width="2"/>
+                            <text x="76" y="405" text-anchor="middle" font-size="12" fill="#000" font-weight="bold">1</text>
+                            <circle cx="76" cy="445" r="12" fill="#fff" stroke="#000" stroke-width="2"/>
+                            <text x="76" y="450" text-anchor="middle" font-size="12" fill="#000" font-weight="bold">1</text>
+                            <!-- Wire label in clear area -->
+                            <text x="190" y="350" font-size="11" fill="#888" font-family="monospace" font-weight="bold">① RESET→GND</text>
+
+                            <!-- Wire 2: 5V to 5V (red wire) - Separated path -->
+                            <path d="M 76 430 C 200 430, 350 380, 500 350 C 600 330, 670 280, 741 220"
+                                  fill="none" stroke="#ff0000" stroke-width="6" opacity="0.3"/>
+                            <path class="wire wire-red" d="M 76 430 C 200 430, 350 380, 500 350 C 600 330, 670 280, 741 220"
+                                  stroke="#ff0000" stroke-width="4"/>
+                            <circle cx="76" cy="430" r="12" fill="#ff0000" stroke="#000" stroke-width="2"/>
+                            <text x="76" y="435" text-anchor="middle" font-size="12" fill="#fff" font-weight="bold">2</text>
+                            <circle cx="741" cy="220" r="12" fill="#ff0000" stroke="#000" stroke-width="2"/>
+                            <text x="741" y="225" text-anchor="middle" font-size="12" fill="#fff" font-weight="bold">2</text>
+                            <text x="400" y="335" font-size="11" fill="#ff6666" font-family="monospace" font-weight="bold">② POWER 5V</text>
+
+                            <!-- Wire 3: GND to GND (black wire) - Lower path -->
+                            <path d="M 76 460 C 200 460, 350 470, 500 460 C 600 455, 670 360, 741 245"
+                                  fill="none" stroke="#000" stroke-width="6" opacity="0.3"/>
+                            <path class="wire wire-black" d="M 76 460 C 200 460, 350 470, 500 460 C 600 455, 670 360, 741 245"
+                                  stroke="#1a1a1a" stroke-width="4"/>
+                            <circle cx="76" cy="460" r="12" fill="#1a1a1a" stroke="#fff" stroke-width="2"/>
+                            <text x="76" y="465" text-anchor="middle" font-size="12" fill="#fff" font-weight="bold">3</text>
+                            <circle cx="741" cy="245" r="12" fill="#1a1a1a" stroke="#fff" stroke-width="2"/>
+                            <text x="741" y="250" text-anchor="middle" font-size="12" fill="#fff" font-weight="bold">3</text>
+                            <text x="400" y="480" font-size="11" fill="#888" font-family="monospace" font-weight="bold">③ GROUND</text>
+
+                            <!-- Wire 4: TX to U0R - CROSSED (blue wire) - Upper curved path -->
+                            <path d="M 274 415 C 350 415, 420 200, 550 150 C 680 100, 850 130, 1019 270"
+                                  fill="none" stroke="#0066ff" stroke-width="6" opacity="0.3"/>
+                            <path class="wire wire-blue" d="M 274 415 C 350 415, 420 200, 550 150 C 680 100, 850 130, 1019 270"
+                                  stroke="#0066ff" stroke-width="4"/>
+                            <circle cx="274" cy="415" r="12" fill="#0066ff" stroke="#000" stroke-width="2"/>
+                            <text x="274" y="420" text-anchor="middle" font-size="12" fill="#fff" font-weight="bold">4</text>
+                            <circle cx="1019" cy="270" r="12" fill="#0066ff" stroke="#000" stroke-width="2"/>
+                            <text x="1019" y="275" text-anchor="middle" font-size="12" fill="#fff" font-weight="bold">4</text>
+                            <text x="550" y="130" font-size="11" fill="#66aaff" font-family="monospace" font-weight="bold">④ TX→RX (CROSSED!)</text>
+
+                            <!-- Wire 5: RX to U0T - CROSSED (green wire) - Middle curved path -->
+                            <path d="M 274 400 C 360 400, 440 180, 580 140 C 720 100, 880 120, 1019 295"
+                                  fill="none" stroke="#00ff00" stroke-width="6" opacity="0.3"/>
+                            <path class="wire wire-green" d="M 274 400 C 360 400, 440 180, 580 140 C 720 100, 880 120, 1019 295"
+                                  stroke="#00ff00" stroke-width="4"/>
+                            <circle cx="274" cy="400" r="12" fill="#00ff00" stroke="#000" stroke-width="2"/>
+                            <text x="274" y="405" text-anchor="middle" font-size="12" fill="#000" font-weight="bold">5</text>
+                            <circle cx="1019" cy="295" r="12" fill="#00ff00" stroke="#000" stroke-width="2"/>
+                            <text x="1019" y="300" text-anchor="middle" font-size="12" fill="#000" font-weight="bold">5</text>
+                            <text x="580" y="110" font-size="11" fill="#66ff66" font-family="monospace" font-weight="bold">⑤ RX→TX (CROSSED!)</text>
+
+                            <!-- Wire 6: GND to IO0 - BOOTLOADER (orange wire) - Bottom path -->
+                            <path d="M 76 475 C 200 490, 350 530, 550 540 C 700 545, 850 490, 1019 345"
+                                  fill="none" stroke="#ff6600" stroke-width="6" opacity="0.3"/>
+                            <path class="wire wire-orange" d="M 76 475 C 200 490, 350 530, 550 540 C 700 545, 850 490, 1019 345"
+                                  stroke="#ff6600" stroke-width="4"/>
+                            <circle cx="76" cy="475" r="12" fill="#ff6600" stroke="#000" stroke-width="2"/>
+                            <text x="76" y="480" text-anchor="middle" font-size="12" fill="#000" font-weight="bold">6</text>
+                            <circle cx="1019" cy="345" r="12" fill="#ff6600" stroke="#000" stroke-width="2"/>
+                            <text x="1019" y="350" text-anchor="middle" font-size="12" fill="#000" font-weight="bold">6</text>
+                            <text x="550" y="560" font-size="11" fill="#ff9944" font-family="monospace" font-weight="bold">⑥ BOOTLOADER - GND→IO0 (Remove after upload!)</text>
+
+                            <!-- Connection point indicators on boards (smaller, non-numbered) -->
+                            <circle cx="76" cy="400" r="5" fill="#ffd700" stroke="#000" stroke-width="1" opacity="0.7"/>
+                            <circle cx="76" cy="430" r="5" fill="#ffd700" stroke="#000" stroke-width="1" opacity="0.7"/>
+                            <circle cx="76" cy="445" r="5" fill="#ffd700" stroke="#000" stroke-width="1" opacity="0.7"/>
+                            <circle cx="76" cy="460" r="5" fill="#ffd700" stroke="#000" stroke-width="1" opacity="0.7"/>
+                            <circle cx="76" cy="475" r="5" fill="#ffd700" stroke="#000" stroke-width="1" opacity="0.7"/>
+                            <circle cx="274" cy="400" r="5" fill="#ffd700" stroke="#000" stroke-width="1" opacity="0.7"/>
+                            <circle cx="274" cy="415" r="5" fill="#ffd700" stroke="#000" stroke-width="1" opacity="0.7"/>
+
+                            <rect x="736" y="217" width="10" height="6" rx="1" fill="#1a1a1a" stroke="#ffd700" opacity="0.7"/>
+                            <rect x="736" y="242" width="10" height="6" rx="1" fill="#1a1a1a" stroke="#ffd700" opacity="0.7"/>
+                            <rect x="1014" y="267" width="10" height="6" rx="1" fill="#1a1a1a" stroke="#ffd700" opacity="0.7"/>
+                            <rect x="1014" y="292" width="10" height="6" rx="1" fill="#1a1a1a" stroke="#ffd700" opacity="0.7"/>
+                            <rect x="1014" y="342" width="10" height="6" rx="1" fill="#1a1a1a" stroke="#ffd700" opacity="0.7"/>
+                        </svg>
+                    </div>
+
+                    <div class="callout callout-critical">
+                        <span class="callout-icon">⚠</span>
+                        <strong>CRITICAL CONNECTIONS:</strong> TX→RX and RX→TX (wires are CROSSED!). IO0→GND enables bootloader mode but MUST be removed after upload!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Detailed Wiring Table -->
+            <div class="step" id="step-2-4">
+                <input type="checkbox" class="step-checkbox" data-phase="2" data-step="4" onchange="onCheck(this)">
+                <span class="step-number">04</span>
+                <div class="step-content">
+                    <p><strong>Detailed wiring table</strong></p>
+                    <table class="wiring-table">
+                        <tr>
+                            <th>#</th>
+                            <th>Arduino Uno Pin</th>
+                            <th>Wire Type</th>
+                            <th>ESP32-CAM Pin</th>
+                            <th>Notes</th>
+                        </tr>
+                        <tr class="critical">
+                            <td>1</td>
+                            <td><strong>RESET</strong></td>
+                            <td>Male-to-Male</td>
+                            <td><strong>GND (any)</strong></td>
+                            <td>DISABLES Arduino CPU - REQUIRED!</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>5V</td>
+                            <td>Female-to-Male</td>
+                            <td>5V</td>
+                            <td>Power for ESP32-CAM</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>GND (any)</td>
+                            <td>Female-to-Male</td>
+                            <td>GND (bottom)</td>
+                            <td>Common ground - REQUIRED!</td>
+                        </tr>
+                        <tr class="critical">
+                            <td>4</td>
+                            <td>TX (Pin 1)</td>
+                            <td>Female-to-Male</td>
+                            <td>U0R (RX)</td>
+                            <td>CROSSED! TX→RX</td>
+                        </tr>
+                        <tr class="critical">
+                            <td>5</td>
+                            <td>RX (Pin 0)</td>
+                            <td>Female-to-Male</td>
+                            <td>U0T (TX)</td>
+                            <td>CROSSED! RX→TX</td>
+                        </tr>
+                        <tr class="critical">
+                            <td>6</td>
+                            <td>GND (any)</td>
+                            <td>Female-to-Male</td>
+                            <td>IO0</td>
+                            <td>BOOTLOADER MODE - Remove after upload!</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Steps 5-11: Connection Instructions (abbreviated for space) -->
+            <div class="step" id="step-2-5">
+                <input type="checkbox" class="step-checkbox" data-phase="2" data-step="5" onchange="onCheck(this)">
+                <span class="step-number">05</span>
+                <div class="step-content">
+                    <p><strong>Connection #1: Disable Arduino Uno's processor (RESET→GND)</strong></p>
+                    <ol class="sub-steps">
+                        <li>Take a male-to-male jumper wire</li>
+                        <li>Connect one end to Arduino Uno's <strong>RESET</strong> pin</li>
+                        <li>Connect the other end to any <strong>GND</strong> pin on Arduino Uno</li>
+                    </ol>
+                    <div class="callout callout-critical">
+                        <span class="callout-icon">⚠</span>
+                        This wire MUST stay connected during upload. The Arduino's built-in LED (pin 13) should turn OFF, confirming the CPU is disabled.
+                    </div>
+                </div>
+            </div>
+
+            <div class="step" id="step-2-6">
+                <input type="checkbox" class="step-checkbox" data-phase="2" data-step="6" onchange="onCheck(this)">
+                <span class="step-number">06</span>
+                <div class="step-content">
+                    <p><strong>Connection #2: Power - 5V to 5V</strong></p>
+                    <ol class="sub-steps">
+                        <li>Take a female-to-male jumper wire (RED recommended)</li>
+                        <li>Plug male end into Arduino Uno's <strong>5V</strong> pin</li>
+                        <li>Plug female end onto ESP32-CAM's <strong>5V</strong> pin</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="step" id="step-2-7">
+                <input type="checkbox" class="step-checkbox" data-phase="2" data-step="7" onchange="onCheck(this)">
+                <span class="step-number">07</span>
+                <div class="step-content">
+                    <p><strong>Connection #3: Ground - GND to GND</strong></p>
+                    <ol class="sub-steps">
+                        <li>Take a female-to-male jumper wire (BLACK recommended)</li>
+                        <li>Plug male end into Arduino Uno's <strong>GND</strong> pin</li>
+                        <li>Plug female end onto ESP32-CAM's <strong>GND</strong> pin (bottom pins, leftmost)</li>
+                    </ol>
+                    <div class="callout callout-critical">
+                        <span class="callout-icon">⚠</span>
+                        Common ground is MANDATORY for serial communication to work!
+                    </div>
+                </div>
+            </div>
+
+            <div class="step" id="step-2-8">
+                <input type="checkbox" class="step-checkbox" data-phase="2" data-step="8" onchange="onCheck(this)">
+                <span class="step-number">08</span>
+                <div class="step-content">
+                    <p><strong>Connection #4: Serial Data - TX to RX (CROSSED!)</strong></p>
+                    <ol class="sub-steps">
+                        <li>Take a female-to-male jumper wire (BLUE or GREEN recommended)</li>
+                        <li>Plug male end into Arduino Uno's <strong>TX (Pin 1)</strong></li>
+                        <li>Plug female end onto ESP32-CAM's <strong>U0R (RX)</strong> pin</li>
+                    </ol>
+                    <div class="callout callout-warning">
+                        <span class="callout-icon">⚠</span>
+                        TX goes to RX (transmit to receive). The wires are CROSSED!
+                    </div>
+                </div>
+            </div>
+
+            <div class="step" id="step-2-9">
+                <input type="checkbox" class="step-checkbox" data-phase="2" data-step="9" onchange="onCheck(this)">
+                <span class="step-number">09</span>
+                <div class="step-content">
+                    <p><strong>Connection #5: Serial Data - RX to TX (CROSSED!)</strong></p>
+                    <ol class="sub-steps">
+                        <li>Take a female-to-male jumper wire (ORANGE or YELLOW recommended)</li>
+                        <li>Plug male end into Arduino Uno's <strong>RX (Pin 0)</strong></li>
+                        <li>Plug female end onto ESP32-CAM's <strong>U0T (TX)</strong> pin</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="step" id="step-2-10">
+                <input type="checkbox" class="step-checkbox" data-phase="2" data-step="10" onchange="onCheck(this)">
+                <span class="step-number">10</span>
+                <div class="step-content">
+                    <p><strong>Connection #6: Bootloader Mode - GND to IO0</strong></p>
+                    <ol class="sub-steps">
+                        <li>Take a female-to-male jumper wire (WHITE recommended)</li>
+                        <li>Plug male end into another Arduino Uno <strong>GND</strong> pin</li>
+                        <li>Plug female end onto ESP32-CAM's <strong>IO0</strong> pin</li>
+                    </ol>
+                    <div class="callout callout-critical">
+                        <span class="callout-icon">⚠</span>
+                        This wire MUST be connected DURING upload, but MUST be REMOVED AFTER upload completes!
+                    </div>
+                </div>
+            </div>
+
+            <div class="step" id="step-2-11">
+                <input type="checkbox" class="step-checkbox" data-phase="2" data-step="11" onchange="onCheck(this)">
+                <span class="step-number">11</span>
+                <div class="step-content">
+                    <p><strong>Verify all connections</strong></p>
+                    <ol class="sub-steps">
+                        <li>✓ Arduino RESET → Arduino GND (male-to-male)</li>
+                        <li>✓ Arduino 5V → ESP32-CAM 5V</li>
+                        <li>✓ Arduino GND → ESP32-CAM GND</li>
+                        <li>✓ Arduino TX → ESP32-CAM U0R (CROSSED)</li>
+                        <li>✓ Arduino RX → ESP32-CAM U0T (CROSSED)</li>
+                        <li>✓ Arduino GND → ESP32-CAM IO0</li>
+                    </ol>
+                    <div class="callout callout-info">
+                        <span class="callout-icon">ℹ</span>
+                        Total wires: 6. ESP32-CAM's red power LED should be ON if connections are correct.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PHASE 3: Configure & Upload Firmware -->
+    <div class="phase collapsed" id="phase-3">
+        <div class="phase-header" onclick="togglePhase(this)">
+            <span class="phase-arrow">▼</span>
+            <span class="phase-number">Phase 3</span>
+            <span class="phase-title">Configure & Upload Firmware to ESP32-CAM</span>
+            <span class="phase-step-count">14 steps</span>
+        </div>
+        <div class="phase-body">
+            <!-- Step 1 -->
+            <div class="step" id="step-3-1">
+                <input type="checkbox" class="step-checkbox" data-phase="3" data-step="1" onchange="onCheck(this)">
+                <span class="step-number">01</span>
+                <div class="step-content">
+                    <p><strong>Download the DogBot firmware</strong></p>
+                    <ol class="sub-steps">
+                        <li>Navigate to your project folder: <code>C:\Users\vese300082\dog-bot\code</code></li>
+                        <li>Open the firmware folder: <code>firmware\esp32cam_dogbot\</code></li>
+                        <li>Locate the file: <code>esp32cam_dogbot.ino</code></li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step" id="step-3-2">
+                <input type="checkbox" class="step-checkbox" data-phase="3" data-step="2" onchange="onCheck(this)">
+                <span class="step-number">02</span>
+                <div class="step-content">
+                    <p><strong>Open firmware in Arduino IDE</strong></p>
+                    <ol class="sub-steps">
+                        <li>Right-click <code>esp32cam_dogbot.ino</code></li>
+                        <li>Select <strong>"Open with" → "Arduino IDE"</strong></li>
+                        <li>Arduino IDE will open with the firmware loaded</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="step" id="step-3-3">
+                <input type="checkbox" class="step-checkbox" data-phase="3" data-step="3" onchange="onCheck(this)">
+                <span class="step-number">03</span>
+                <div class="step-content">
+                    <p><strong>Configure WiFi credentials</strong></p>
+                    <p>Locate lines 14-15 in the code and replace with your WiFi network name and password:</p>
+                    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>const char* ssid = "YOUR_WIFI_NAME";
+const char* password = "YOUR_WIFI_PASSWORD";</div>
+                    <div class="callout callout-warning">
+                        <span class="callout-icon">⚠</span>
+                        Use 2.4GHz WiFi network only. ESP32-CAM does NOT support 5GHz WiFi!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="step" id="step-3-4">
+                <input type="checkbox" class="step-checkbox" data-phase="3" data-step="4" onchange="onCheck(this)">
+                <span class="step-number">04</span>
+                <div class="step-content">
+                    <p><strong>Configure MQTT broker credentials (optional)</strong></p>
+                    <p>If you want remote control via MQTT, update lines 20-26 with your HiveMQ Cloud credentials:</p>
+                    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>const char* mqtt_broker = "your-cluster.hivemq.cloud";
+const int mqtt_port = 8883;
+const char* mqtt_username = "your_username";
+const char* mqtt_password = "your_password";
+const char* mqtt_topic_command = "dogbot/command";
+const char* mqtt_topic_status = "dogbot/status";</div>
+                    <div class="callout callout-info">
+                        <span class="callout-icon">ℹ</span>
+                        If you don't have MQTT broker, leave these as-is. Local HTTP control will still work.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="step" id="step-3-5">
+                <input type="checkbox" class="step-checkbox" data-phase="3" data-step="5" onchange="onCheck(this)">
+                <span class="step-number">05</span>
+                <div class="step-content">
+                    <p><strong>Select the correct board</strong></p>
+                    <ol class="sub-steps">
+                        <li>Click <strong>Tools</strong> → <strong>Board</strong> → <strong>ESP32 Arduino</strong></li>
+                        <li>Scroll down and select <strong>"AI Thinker ESP32-CAM"</strong></li>
+                    </ol>
+                    <div class="callout callout-critical">
+                        <span class="callout-icon">⚠</span>
+                        MUST select "AI Thinker ESP32-CAM" - other ESP32 boards won't work correctly!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6 -->
+            <div class="step" id="step-3-6">
+                <input type="checkbox" class="step-checkbox" data-phase="3" data-step="6" onchange="onCheck(this)">
+                <span class="step-number">06</span>
+                <div class="step-content">
+                    <p><strong>Select the COM port</strong></p>
+                    <ol class="sub-steps">
+                        <li>Click <strong>Tools</strong> → <strong>Port</strong></li>
+                        <li>Select the COM port with <strong>"Arduino Uno"</strong> in parentheses</li>
+                        <li>Example: <code>COM3 (Arduino Uno)</code></li>
+                    </ol>
+                    <div class="callout callout-info">
+                        <span class="callout-icon">ℹ</span>
+                        If you don't see any ports, reconnect the Arduino Uno USB cable and wait 5 seconds.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 7 -->
+            <div class="step" id="step-3-7">
+                <input type="checkbox" class="step-checkbox" data-phase="3" data-step="7" onchange="onCheck(this)">
+                <span class="step-number">07</span>
+                <div class="step-content">
+                    <p><strong>Configure upload settings</strong></p>
+                    <p>Set these exact settings in the Tools menu:</p>
+                    <ol class="sub-steps">
+                        <li><strong>Upload Speed:</strong> 115200</li>
+                        <li><strong>Flash Frequency:</strong> 80MHz</li>
+                        <li><strong>Flash Mode:</strong> QIO</li>
+                        <li><strong>Partition Scheme:</strong> Huge APP (3MB No OTA/1MB SPIFFS)</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Step 8 -->
+            <div class="step" id="step-3-8">
+                <input type="checkbox" class="step-checkbox" data-phase="3" data-step="8" onchange="onCheck(this)">
+                <span class="step-number">08</span>
+                <div class="step-content">
+                    <p><strong>Verify all wiring is still connected</strong></p>
+                    <ol class="sub-steps">
+                        <li>✓ Arduino RESET → Arduino GND (wire #1)</li>
+                        <li>✓ Arduino 5V → ESP32-CAM 5V (wire #2)</li>
+                        <li>✓ Arduino GND → ESP32-CAM GND (wire #3)</li>
+                        <li>✓ Arduino TX → ESP32-CAM U0R (wire #4)</li>
+                        <li>✓ Arduino RX → ESP32-CAM U0T (wire #5)</li>
+                        <li>✓ Arduino GND → ESP32-CAM IO0 (wire #6) - MUST be connected!</li>
+                    </ol>
+                    <div class="callout callout-critical">
+                        <span class="callout-icon">⚠</span>
+                        Wire #6 (GND→IO0) MUST be connected for upload to work. This enables bootloader mode.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 9 -->
+            <div class="step" id="step-3-9">
+                <input type="checkbox" class="step-checkbox" data-phase="3" data-step="9" onchange="onCheck(this)">
+                <span class="step-number">09</span>
+                <div class="step-content">
+                    <p><strong>Press the RST button on ESP32-CAM</strong></p>
+                    <ol class="sub-steps">
+                        <li>Locate the small black button on ESP32-CAM labeled <strong>"RST"</strong></li>
+                        <li>Press and release it once</li>
+                        <li>This resets the ESP32-CAM into bootloader mode</li>
+                    </ol>
+                    <div class="callout callout-info">
+                        <span class="callout-icon">ℹ</span>
+                        If your ESP32-CAM doesn't have a reset button, briefly disconnect and reconnect the 5V power wire instead.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 10 -->
+            <div class="step" id="step-3-10">
+                <input type="checkbox" class="step-checkbox" data-phase="3" data-step="10" onchange="onCheck(this)">
+                <span class="step-number">10</span>
+                <div class="step-content">
+                    <p><strong>Upload the firmware</strong></p>
+                    <ol class="sub-steps">
+                        <li>Click the <strong>Upload</strong> button (right arrow icon) in Arduino IDE</li>
+                        <li>Wait for compilation (30-60 seconds)</li>
+                        <li>Watch the output window for upload progress</li>
+                        <li>Upload takes 2-3 minutes at 115200 baud</li>
+                    </ol>
+                    <div class="callout callout-warning">
+                        <span class="callout-icon">⚠</span>
+                        Do NOT disconnect any wires during upload! If upload fails with "A fatal error occurred: Failed to connect", press RST button again and retry upload immediately.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 11 -->
+            <div class="step" id="step-3-11">
+                <input type="checkbox" class="step-checkbox" data-phase="3" data-step="11" onchange="onCheck(this)">
+                <span class="step-number">11</span>
+                <div class="step-content">
+                    <p><strong>Wait for upload completion</strong></p>
+                    <p>You should see this output sequence:</p>
+                    <div class="code-block">Connecting........_____....._____.....
+Writing at 0x00010000... (10%)
+Writing at 0x00020000... (20%)
+...
+Writing at 0x000e0000... (100%)
+Wrote 1234567 bytes (654321 compressed) at 0x00010000 in 45.6 seconds
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...</div>
+                    <div class="callout callout-info">
+                        <span class="callout-icon">ℹ</span>
+                        "Hard resetting via RTS pin..." means upload succeeded!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 12 -->
+            <div class="step" id="step-3-12">
+                <input type="checkbox" class="step-checkbox" data-phase="3" data-step="12" onchange="onCheck(this)">
+                <span class="step-number">12</span>
+                <div class="step-content">
+                    <p><strong>CRITICAL: Remove the IO0 bootloader wire</strong></p>
+                    <ol class="sub-steps">
+                        <li>Disconnect wire #6 (GND → IO0 orange wire) from ESP32-CAM</li>
+                        <li>Leave all other 5 wires connected</li>
+                    </ol>
+                    <div class="callout callout-critical">
+                        <span class="callout-icon">⚠</span>
+                        You MUST remove this wire! If left connected, ESP32 will stay in bootloader mode and won't run your program!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 13 -->
+            <div class="step" id="step-3-13">
+                <input type="checkbox" class="step-checkbox" data-phase="3" data-step="13" onchange="onCheck(this)">
+                <span class="step-number">13</span>
+                <div class="step-content">
+                    <p><strong>Open Serial Monitor to verify</strong></p>
+                    <ol class="sub-steps">
+                        <li>Click <strong>Tools</strong> → <strong>Serial Monitor</strong></li>
+                        <li>Set baud rate to <strong>115200</strong> (bottom-right dropdown)</li>
+                        <li>Press the <strong>RST</strong> button on ESP32-CAM</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Step 14 -->
+            <div class="step" id="step-3-14">
+                <input type="checkbox" class="step-checkbox" data-phase="3" data-step="14" onchange="onCheck(this)">
+                <span class="step-number">14</span>
+                <div class="step-content">
+                    <p><strong>Verify serial output</strong></p>
+                    <p>You should see this output in Serial Monitor:</p>
+                    <div class="code-block">=== DogBot ESP32-CAM Starting ===
+Camera init: OK
+L298N with PWM speed control
+Connecting to WiFi: YOUR_WIFI_NAME
+WiFi connected: 192.168.1.100
+Camera stream: http://192.168.1.100:81/stream
+Control server started on port 80
+MQTT connecting to broker...
+MQTT connected successfully!</div>
+                    <p>Key things to verify:</p>
+                    <ul class="sub-steps">
+                        <li>✓ WiFi connected with IP address shown</li>
+                        <li>✓ Camera stream URL displayed</li>
+                        <li>✓ "L298N with PWM speed control" message</li>
+                        <li>✓ If using MQTT: "MQTT connected successfully"</li>
+                    </ul>
+                    <div class="callout callout-info">
+                        <span class="callout-icon">ℹ</span>
+                        Write down the IP address! You'll need it to configure the backend. Example: 192.168.1.100
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PHASE 4: Cloudflare Tunnel Setup -->
+    <div class="phase collapsed" id="phase-4">
+        <div class="phase-header" onclick="togglePhase(this)">
+            <span class="phase-arrow">▼</span>
+            <span class="phase-number">Phase 4</span>
+            <span class="phase-title">Setup Cloudflare Tunnel for Remote Access</span>
+            <span class="phase-step-count">5 steps</span>
+        </div>
+        <div class="phase-body">
+            <!-- Step 1 -->
+            <div class="step" id="step-4-1">
+                <input type="checkbox" class="step-checkbox" data-phase="4" data-step="1" onchange="onCheck(this)">
+                <span class="step-number">01</span>
+                <div class="step-content">
+                    <p><strong>Why Cloudflare Tunnel?</strong></p>
+                    <p>The ESP32-CAM video stream (http://192.168.1.100:81/stream) only works on your local WiFi network. To access it remotely from anywhere in the world, we'll use Cloudflare Tunnel to create a secure connection.</p>
+                    <p>Installation steps:</p>
+                    <ul class="sub-steps">
+                        <li>go to this webpage and download the winget "https://learn.microsoft.com/en-us/windows/package-manager/winget/"</li>
+                        <li>after the page is opened scroll down you can see -- Install WinGet preview version [Developers Only]</li>
+                        <li>in that click --  WinGet preview version and download that into your system</li>
+                        <li>it is offical windows tool only so do be scared</li>
+                        <li>No account creation required</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step" id="step-4-2">
+                <input type="checkbox" class="step-checkbox" data-phase="4" data-step="2" onchange="onCheck(this)">
+                <span class="step-number">02</span>
+                <div class="step-content">
+                    <p><strong>Install Cloudflare Tunnel using winget</strong></p>
+                    <ol class="sub-steps">
+                        <li>Open <strong>Command Prompt</strong> or <strong>PowerShell</strong></li>
+                        <li>Press <strong>Windows Key + R</strong>, type <code>cmd</code>, press Enter</li>
+                        <li>Run this command:</li>
+                    </ol>
+                    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>winget install cloudflare.cloudflared</div>
+                    <ol class="sub-steps" start="4">
+                        <li>Wait for installation to complete (30 seconds to 1 minute)</li>
+                        <li>You'll see "Successfully installed" when done</li>
+                        <li>Close and reopen Command Prompt to refresh PATH</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="step" id="step-4-3">
+                <input type="checkbox" class="step-checkbox" data-phase="4" data-step="3" onchange="onCheck(this)">
+                <span class="step-number">03</span>
+                <div class="step-content">
+                    <p><strong>Start the tunnel and get your public URL</strong></p>
+                    <ol class="sub-steps">
+                        <li>Make sure your ESP32-CAM is powered on and connected to WiFi</li>
+                        <li>Note your ESP32-CAM IP address from Phase 3 (e.g., 192.168.1.100)</li>
+                        <li>In Command Prompt, run this command (replace IP address with yours):</li>
+                    </ol>
+                    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>cloudflared tunnel --url http://192.168.1.100:81</div>
+                    <ol class="sub-steps" start="4">
+                        <li>Wait 5-10 seconds for the tunnel to connect</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="step" id="step-4-4">
+                <input type="checkbox" class="step-checkbox" data-phase="4" data-step="4" onchange="onCheck(this)">
+                <span class="step-number">04</span>
+                <div class="step-content">
+                    <p><strong>Copy your public URL</strong></p>
+                    <p>You'll see output like this:</p>
+                    <div class="code-block">+--------------------------------------------------------------------------------------------+
+|  Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):  |
+|  https://random-words-here.trycloudflare.com                                               |
++--------------------------------------------------------------------------------------------+</div>
+                    <ol class="sub-steps">
+                        <li>Copy the <strong>https://random-words-here.trycloudflare.com</strong> URL</li>
+                        <li>This is your public video stream URL!</li>
+                        <li>Write it down - you'll need it in the next step</li>
+                    </ol>
+                    <div class="callout callout-critical">
+                        <span class="callout-icon">⚠</span>
+                        <strong>IMPORTANT:</strong> Keep this Command Prompt window open! Closing it will stop the tunnel. The URL will change each time you restart the tunnel.
+                    </div>
+                    <div class="callout callout-info">
+                        <span class="callout-icon">ℹ</span>
+                        Test it: Open the URL in your browser and add <code>/stream</code> at the end. Example: <code>https://random-words-here.trycloudflare.com/stream</code> - you should see live video!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PHASE 5: Final Hardware Assembly (L298N) -->
+    <div class="phase collapsed" id="phase-5">
+        <div class="phase-header" onclick="togglePhase(this)">
+            <span class="phase-arrow">▼</span>
+            <span class="phase-number">Phase 5</span>
+            <span class="phase-title">Final Hardware Assembly with L298N Motor Driver</span>
+            <span class="phase-step-count">10 steps</span>
+        </div>
+        <div class="phase-body">
+            <!-- Step 1 -->
+            <div class="step" id="step-5-1">
+                <input type="checkbox" class="step-checkbox" data-phase="5" data-step="1" onchange="onCheck(this)">
+                <span class="step-number">01</span>
+                <div class="step-content">
+                    <p><strong>Disconnect ESP32-CAM from Arduino Uno</strong></p>
+                    <ol class="sub-steps">
+                        <li>Gently remove all 5 wires connecting ESP32-CAM to Arduino Uno</li>
+                        <li>You can also disconnect Arduino Uno from computer (USB cable)</li>
+                        <li>Set Arduino Uno aside - it's no longer needed</li>
+                    </ol>
+                    <div class="callout callout-info">
+                        <span class="callout-icon">ℹ</span>
+                        The firmware is now permanently stored in ESP32-CAM's flash memory. Arduino Uno was only needed for uploading.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step" id="step-5-2">
+                <input type="checkbox" class="step-checkbox" data-phase="5" data-step="2" onchange="onCheck(this)">
+                <span class="step-number">02</span>
+                <div class="step-content">
+                    <p><strong>Gather L298N hardware components</strong></p>
+                    <ul class="sub-steps">
+                        <li>L298N motor driver module (red board with heat sink)</li>
+                        <li>ESP32-CAM module (with firmware already uploaded)</li>
+                        <li>2× DC motors (for robot movement)</li>
+                        <li>7.4V - 12V battery pack (for motor power)</li>
+                        <li>Female-to-female jumper wires (11 wires needed)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="step" id="step-5-3">
+                <input type="checkbox" class="step-checkbox" data-phase="5" data-step="3" onchange="onCheck(this)">
+                <span class="step-number">03</span>
+                <div class="step-content">
+                    <p><strong>Understanding the L298N pinout</strong></p>
+                    <p>The L298N has the following key pins:</p>
+                    <table class="wiring-table">
+                        <tr>
+                            <th>Pin</th>
+                            <th>Purpose</th>
+                        </tr>
+                        <tr>
+                            <td><strong>12V</strong></td>
+                            <td>Motor power input (7.4V - 12V battery)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>GND</strong></td>
+                            <td>Common ground</td>
+                        </tr>
+                        <tr>
+                            <td><strong>5V</strong></td>
+                            <td>Regulated 5V output (can power ESP32-CAM)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ENA</strong></td>
+                            <td>Enable Motor A + PWM speed control</td>
+                        </tr>
+                        <tr>
+                            <td><strong>IN1</strong></td>
+                            <td>Motor A direction control 1</td>
+                        </tr>
+                        <tr>
+                            <td><strong>IN2</strong></td>
+                            <td>Motor A direction control 2</td>
+                        </tr>
+                        <tr>
+                            <td><strong>IN3</strong></td>
+                            <td>Motor B direction control 1</td>
+                        </tr>
+                        <tr>
+                            <td><strong>IN4</strong></td>
+                            <td>Motor B direction control 2</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ENB</strong></td>
+                            <td>Enable Motor B + PWM speed control</td>
+                        </tr>
+                        <tr>
+                            <td><strong>OUT1/OUT2</strong></td>
+                            <td>Motor A output terminals</td>
+                        </tr>
+                        <tr>
+                            <td><strong>OUT3/OUT4</strong></td>
+                            <td>Motor B output terminals</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="step" id="step-5-4">
+                <input type="checkbox" class="step-checkbox" data-phase="5" data-step="4" onchange="onCheck(this)">
+                <span class="step-number">04</span>
+                <div class="step-content">
+                    <p><strong>L298N to ESP32-CAM wiring reference</strong></p>
+                    <p>Use this pin diagram as reference:</p>
+                    <a href="pin_diagram.html" target="_blank" class="pin-link">📌 Open Full Pin Diagram</a>
+                    <table class="wiring-table">
+                        <tr>
+                            <th>L298N Pin</th>
+                            <th>Wire Color</th>
+                            <th>ESP32-CAM Pin</th>
+                            <th>Function</th>
+                        </tr>
+                        <tr>
+                            <td>12V</td>
+                            <td>Red</td>
+                            <td>—</td>
+                            <td>Connect to battery + terminal</td>
+                        </tr>
+                        <tr>
+                            <td>GND</td>
+                            <td>Black</td>
+                            <td>GND</td>
+                            <td>Common ground (also to battery -)</td>
+                        </tr>
+                        <tr>
+                            <td>5V</td>
+                            <td>Red</td>
+                            <td>5V</td>
+                            <td>Power for ESP32-CAM</td>
+                        </tr>
+                        <tr>
+                            <td>ENA</td>
+                            <td>Orange</td>
+                            <td>GPIO2</td>
+                            <td>Motor A speed (PWM)</td>
+                        </tr>
+                        <tr>
+                            <td>IN1</td>
+                            <td>Yellow</td>
+                            <td>GPIO12</td>
+                            <td>Motor A direction 1</td>
+                        </tr>
+                        <tr>
+                            <td>IN2</td>
+                            <td>Green</td>
+                            <td>GPIO13</td>
+                            <td>Motor A direction 2</td>
+                        </tr>
+                        <tr>
+                            <td>IN3</td>
+                            <td>Blue</td>
+                            <td>GPIO14</td>
+                            <td>Motor B direction 1</td>
+                        </tr>
+                        <tr>
+                            <td>IN4</td>
+                            <td>Purple</td>
+                            <td>GPIO15</td>
+                            <td>Motor B direction 2</td>
+                        </tr>
+                        <tr>
+                            <td>ENB</td>
+                            <td>White</td>
+                            <td>GPIO4</td>
+                            <td>Motor B speed (PWM)</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="step" id="step-5-5">
+                <input type="checkbox" class="step-checkbox" data-phase="5" data-step="5" onchange="onCheck(this)">
+                <span class="step-number">05</span>
+                <div class="step-content">
+                    <p><strong>Connect power wires</strong></p>
+                    <ol class="sub-steps">
+                        <li>Connect battery positive (+) to L298N <strong>12V</strong> terminal (use red wire or screw terminal)</li>
+                        <li>Connect battery negative (-) to L298N <strong>GND</strong> terminal (black wire)</li>
+                        <li>Connect L298N <strong>5V</strong> to ESP32-CAM <strong>5V</strong> pin (red jumper wire)</li>
+                        <li>Connect L298N <strong>GND</strong> to ESP32-CAM <strong>GND</strong> pin (black jumper wire)</li>
+                    </ol>
+                    <div class="callout callout-critical">
+                        <span class="callout-icon">⚠</span>
+                        VERIFY battery polarity! Reversed polarity will destroy the L298N and ESP32-CAM!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6 -->
+            <div class="step" id="step-5-6">
+                <input type="checkbox" class="step-checkbox" data-phase="5" data-step="6" onchange="onCheck(this)">
+                <span class="step-number">06</span>
+                <div class="step-content">
+                    <p><strong>Connect PWM speed control pins</strong></p>
+                    <ol class="sub-steps">
+                        <li>Remove the jumper cap from L298N <strong>ENA</strong> pin (if present)</li>
+                        <li>Remove the jumper cap from L298N <strong>ENB</strong> pin (if present)</li>
+                        <li>Connect L298N <strong>ENA</strong> → ESP32-CAM <strong>GPIO2</strong> (orange wire)</li>
+                        <li>Connect L298N <strong>ENB</strong> → ESP32-CAM <strong>GPIO4</strong> (white wire)</li>
+                    </ol>
+                    <div class="callout callout-warning">
+                        <span class="callout-icon">⚠</span>
+                        The jumper caps MUST be removed for PWM speed control to work!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 7 -->
+            <div class="step" id="step-5-7">
+                <input type="checkbox" class="step-checkbox" data-phase="5" data-step="7" onchange="onCheck(this)">
+                <span class="step-number">07</span>
+                <div class="step-content">
+                    <p><strong>Connect Motor A direction control</strong></p>
+                    <ol class="sub-steps">
+                        <li>Connect L298N <strong>IN1</strong> → ESP32-CAM <strong>GPIO12</strong> (yellow wire)</li>
+                        <li>Connect L298N <strong>IN2</strong> → ESP32-CAM <strong>GPIO13</strong> (green wire)</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Step 8 -->
+            <div class="step" id="step-5-8">
+                <input type="checkbox" class="step-checkbox" data-phase="5" data-step="8" onchange="onCheck(this)">
+                <span class="step-number">08</span>
+                <div class="step-content">
+                    <p><strong>Connect Motor B direction control</strong></p>
+                    <ol class="sub-steps">
+                        <li>Connect L298N <strong>IN3</strong> → ESP32-CAM <strong>GPIO14</strong> (blue wire)</li>
+                        <li>Connect L298N <strong>IN4</strong> → ESP32-CAM <strong>GPIO15</strong> (purple wire)</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Step 9 -->
+            <div class="step" id="step-5-9">
+                <input type="checkbox" class="step-checkbox" data-phase="5" data-step="9" onchange="onCheck(this)">
+                <span class="step-number">09</span>
+                <div class="step-content">
+                    <p><strong>Connect the motors</strong></p>
+                    <ol class="sub-steps">
+                        <li>Connect left motor wires to L298N <strong>OUT1</strong> and <strong>OUT2</strong></li>
+                        <li>Connect right motor wires to L298N <strong>OUT3</strong> and <strong>OUT4</strong></li>
+                        <li>Motor polarity determines rotation direction (you can swap if motors run backwards)</li>
+                    </ol>
+                    <div class="callout callout-info">
+                        <span class="callout-icon">ℹ</span>
+                        If a motor spins the wrong direction during testing, simply swap its two wires at the L298N output terminals.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 10 -->
+            <div class="step" id="step-5-10">
+                <input type="checkbox" class="step-checkbox" data-phase="5" data-step="10" onchange="onCheck(this)">
+                <span class="step-number">10</span>
+                <div class="step-content">
+                    <p><strong>Final verification and power-on test</strong></p>
+                    <ol class="sub-steps">
+                        <li>Verify all 11 connections are secure</li>
+                        <li>Verify battery polarity is correct</li>
+                        <li>Turn on battery power</li>
+                        <li>ESP32-CAM red power LED should light up</li>
+                        <li>Wait 10 seconds for ESP32 to connect to WiFi</li>
+                    </ol>
+                    <div class="callout callout-info">
+                        <span class="callout-icon">ℹ</span>
+                        <strong>SUCCESS!</strong> Your DogBot hardware is now fully assembled. Start the backend server (<code>python run.py</code>) and access the dashboard at <code>http://localhost:8000</code> to control your robot!
+                    </div>
+                    <div class="callout callout-warning">
+                        <span class="callout-icon">⚠</span>
+                        First-time safety tip: Place robot on blocks so wheels are off the ground when testing motor commands!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        DOG-BOT RECON SYSTEM // COMPLETE SETUP GUIDE // V3.0 - Enhanced UI
+    </div>
+
+</div>
+
+<script>
+(function() {
+    'use strict';
+
+    // Phase toggle
+    window.togglePhase = function(header) {
+        var phase = header.parentElement;
+        phase.classList.toggle('collapsed');
+    };
+
+    // Storage key helper
+    function storageKey(phase, step) {
+        return 'dogbot-setup-' + phase + '-' + step;
+    }
+
+    // Checkbox handler
+    window.onCheck = function(checkbox) {
+        var phase = checkbox.getAttribute('data-phase');
+        var step = checkbox.getAttribute('data-step');
+        var key = storageKey(phase, step);
+
+        localStorage.setItem(key, checkbox.checked ? '1' : '0');
+
+        var stepEl = checkbox.closest('.step');
+        if (stepEl) {
+            stepEl.classList.toggle('completed', checkbox.checked);
+        }
+
+        updateProgress();
+    };
+
+    // Progress update
+    function updateProgress() {
+        var checkboxes = document.querySelectorAll('.step-checkbox');
+        var total = checkboxes.length;
+        var checked = 0;
+        checkboxes.forEach(function(cb) {
+            if (cb.checked) checked++;
+        });
+
+        var textEl = document.getElementById('progress-text');
+        var fillEl = document.getElementById('progress-fill');
+
+        if (textEl) {
+            textEl.textContent = checked + ' of ' + total + ' steps complete';
+        }
+        if (fillEl) {
+            fillEl.style.width = (total > 0 ? (checked / total * 100) : 0) + '%';
+        }
+    }
+
+    // Restore saved state
+    function restoreStates() {
+        document.querySelectorAll('.step-checkbox').forEach(function(cb) {
+            var phase = cb.getAttribute('data-phase');
+            var step = cb.getAttribute('data-step');
+            var key = storageKey(phase, step);
+            var val = localStorage.getItem(key);
+
+            if (val === '1') {
+                cb.checked = true;
+                var stepEl = cb.closest('.step');
+                if (stepEl) stepEl.classList.add('completed');
+            }
+        });
+
+        updateProgress();
+    }
+
+    // Copy to clipboard
+    window.copyCode = function(btn) {
+        var block = btn.parentElement;
+        var text = block.textContent.replace(/^COPY/, '').trim();
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function() {
+                flashCopyBtn(btn);
+            }).catch(function() {
+                fallbackCopy(text, btn);
+            });
+        } else {
+            fallbackCopy(text, btn);
+        }
+    };
+
+    function fallbackCopy(text, btn) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+            document.execCommand('copy');
+            flashCopyBtn(btn);
+        } catch(e) {}
+        document.body.removeChild(ta);
+    }
+
+    function flashCopyBtn(btn) {
+        btn.textContent = 'COPIED';
+        btn.classList.add('flash');
+        setTimeout(function() {
+            btn.textContent = 'COPY';
+            btn.classList.remove('flash');
+        }, 800);
+    }
+
+    // Initialize
+    restoreStates();
+
+    // SVG pin hover effects
+    document.querySelectorAll('.pin').forEach(function(pin) {
+        pin.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.5)';
+        });
+        pin.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+
+})();
+</script>
+
+</body>
+</html>

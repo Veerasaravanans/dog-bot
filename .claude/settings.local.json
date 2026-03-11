@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(python -m venv:*)",
+      "Bash(.venvScriptspip.exe install -r requirements.txt)",
+      "Bash(\".venv/Scripts/pip.exe\" install -r requirements.txt)",
+      "Bash(\".venv/Scripts/python.exe\" -m backend.main)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(python:*)",
+      "Bash(pip install:*)",
+      "Bash(.venv/Scripts/python:*)"
+    ]
+  },
+  "outputStyle": "default"
+}

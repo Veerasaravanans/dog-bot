@@ -1,0 +1,953 @@
+Complete Remote Connectivity Guide: Chennai ESP32 <-> Bangalore Dashboard                      
+                                                                                                
+ Architecture Overview
+
+ CHENNAI                           CLOUD                        BANGALORE
+ +------------------+                                    +------------------+
+ | ESP32-CAM        |                                    | Your Laptop      |
+ | - Camera feed    |--WiFi--> Chennai PC --Tunnel-->    | - FastAPI backend |
+ | - Motors         |<--MQTT-- HiveMQ Cloud <--MQTT--    | - Dashboard UI   |
+ +------------------+                                    +------------------+
+
+ Two channels:
+ 1. VIDEO: ESP32 -> Chennai PC (same LAN) -> Cloudflare Tunnel -> Bangalore backend (HTTP)      
+ 2. MOTOR COMMANDS: Bangalore backend -> HiveMQ Cloud MQTT -> ESP32 (direct, no Chennai PC      
+ needed)
+
+ ---
+ STEP 1: Set Up HiveMQ Cloud (Free MQTT Broker)
+
+ Do this first from any browser:
+
+ 1. Go to https://www.hivemq.com/mqtt-cloud-broker/
+ 2. Sign up for free account
+ 3. Click "Create New Cluster" (free tier = Serverless)
+ 4. Once created, note down:
+   - Cluster URL: something like abc123def456.s1.eu.hivemq.cloud
+   - Port: 8883 (TLS)
+ 5. Go to "Access Management" tab -> Create credentials:
+   - Username: dogbot-esp32
+   - Password: pick a strong password (e.g., DogBot@2026!Secure)
+ 6. Save these - you'll need them for both ESP32 firmware and backend config
+
+""
+#218a9f2b6e644efcba373298c08a6588.s1.eu.hivemq.cloud
+#8883
+#VJ-DOG-BOT
+#Dog-Bot123
+""
+
+ ---
+ STEP 2: ESP32 Firmware (Upload to ESP32-CAM in Chennai)
+
+ Someone in Chennai needs to flash this updated firmware via Arduino IDE + USB cable.
+
+ 2A. Install PubSubClient Library in Arduino IDE
+
+ 1. Open Arduino IDE
+ 2. Go to Sketch -> Include Library -> Manage Libraries
+ 3. Search for "PubSubClient" by Nick O'Leary
+ 4. Install it (version 2.8+)
+
+ 2B. Updated Firmware Code
+
+ File: firmware/esp32cam_dogbot/esp32cam_dogbot.ino
+
+ The full updated firmware (changes marked with // NEW):
+
+ /*
+  * DogBot Recon System - ESP32-CAM Firmware
+  * MJPEG streaming + TB6612FNG motor control + MQTT remote control
+  * Board: AI-Thinker ESP32-CAM
+  */
+
+ #include "esp_camera.h"
+ #include <WiFi.h>
+ #include <WebServer.h>
+ #include <WiFiClientSecure.h>   // NEW: for TLS MQTT
+ #include <PubSubClient.h>        // NEW: MQTT client
+
+ // ==================== WiFi Config ====================
+ const char* ssid = "YOUR_CHENNAI_WIFI_SSID";      // <-- Chennai WiFi name
+ const char* password = "YOUR_CHENNAI_WIFI_PASSWORD"; // <-- Chennai WiFi password
+
+ // ==================== MQTT Config (NEW) ====================
+ const char* mqtt_server = "YOUR_CLUSTER.s1.eu.hivemq.cloud"; // <-- From Step 1
+ const int mqtt_port = 8883;
+ const char* mqtt_user = "dogbot-esp32";           // <-- From Step 1
+ const char* mqtt_pass = "DogBot@2026!Secure";     // <-- From Step 1
+ const char* mqtt_client_id = "dogbot-esp32-001";
+
+ // MQTT Topics
+ const char* TOPIC_MOTOR_CMD = "dogbot/cmd/motor";     // Subscribe: receive commands
+ const char* TOPIC_STATUS    = "dogbot/status";         // Publish: send status
+ const char* TOPIC_HEARTBEAT = "dogbot/heartbeat";      // Publish: alive signal
+
+ WiFiClientSecure espSecureClient;   // NEW
+ PubSubClient mqttClient(espSecureClient);  // NEW
+ unsigned long lastStatusPublish = 0;  // NEW
+ unsigned long lastMqttReconnect = 0;  // NEW
+
+ // ==================== AI-Thinker ESP32-CAM Pins ====================
+ #define PWDN_GPIO_NUM     32
+ #define RESET_GPIO_NUM    -1
+ #define XCLK_GPIO_NUM      0
+ #define SIOD_GPIO_NUM     26
+ #define SIOC_GPIO_NUM     27
+ #define Y9_GPIO_NUM       35
+ #define Y8_GPIO_NUM       34
+ #define Y7_GPIO_NUM       39
+ #define Y6_GPIO_NUM       36
+ #define Y5_GPIO_NUM       21
+ #define Y4_GPIO_NUM       19
+ #define Y3_GPIO_NUM       18
+ #define Y2_GPIO_NUM        5
+ #define VSYNC_GPIO_NUM    25
+ #define HREF_GPIO_NUM     23
+ #define PCLK_GPIO_NUM     22
+
+ // ==================== TB6612FNG Motor Pins ====================
+ #define STBY_PIN    2
+ #define AIN1_PIN   14
+ #define AIN2_PIN   15
+ #define PWMA_PIN   13
+ #define BIN1_PIN   12
+ #define BIN2_PIN   33
+ #define PWMB_PIN    4
+
+ // ==================== Motor PWM Config ====================
+ #define PWM_FREQ     2000
+ #define PWM_RES      8
+ #define MOTOR_SPEED  200
+
+ #define PWMA_CH  0
+ #define PWMB_CH  1
+
+ // ==================== Servers ====================
+ WebServer controlServer(80);
+ WiFiServer streamServer(81);
+
+ // Motor state
+ String currentMotorState = "stop";
+ unsigned long motorLastCmd = 0;
+
+ // ==================== Motor Functions ====================
+ void motorSetup() {
+   pinMode(STBY_PIN, OUTPUT);
+   pinMode(AIN1_PIN, OUTPUT);
+   pinMode(AIN2_PIN, OUTPUT);
+   pinMode(BIN1_PIN, OUTPUT);
+   pinMode(BIN2_PIN, OUTPUT);
+
+   ledcSetup(PWMA_CH, PWM_FREQ, PWM_RES);
+   ledcSetup(PWMB_CH, PWM_FREQ, PWM_RES);
+   ledcAttachPin(PWMA_PIN, PWMA_CH);
+   ledcAttachPin(PWMB_PIN, PWMB_CH);
+
+   digitalWrite(STBY_PIN, HIGH);
+   motorStop();
+ }
+
+ void motorA(int speed, bool forward) {
+   digitalWrite(AIN1_PIN, forward ? HIGH : LOW);
+   digitalWrite(AIN2_PIN, forward ? LOW : HIGH);
+   ledcWrite(PWMA_CH, abs(speed));
+ }
+
+ void motorB(int speed, bool forward) {
+   digitalWrite(BIN1_PIN, forward ? HIGH : LOW);
+   digitalWrite(BIN2_PIN, forward ? LOW : HIGH);
+   ledcWrite(PWMB_CH, abs(speed));
+ }
+
+ void motorStop() {
+   ledcWrite(PWMA_CH, 0);
+   ledcWrite(PWMB_CH, 0);
+   digitalWrite(AIN1_PIN, LOW);
+   digitalWrite(AIN2_PIN, LOW);
+   digitalWrite(BIN1_PIN, LOW);
+   digitalWrite(BIN2_PIN, LOW);
+   currentMotorState = "stop";
+ }
+
+ void motorForward() {
+   motorA(MOTOR_SPEED, true);
+   motorB(MOTOR_SPEED, true);
+   currentMotorState = "forward";
+ }
+
+ void motorBack() {
+   motorA(MOTOR_SPEED, false);
+   motorB(MOTOR_SPEED, false);
+   currentMotorState = "back";
+ }
+
+ void motorLeft() {
+   motorA(MOTOR_SPEED, false);
+   motorB(MOTOR_SPEED, true);
+   currentMotorState = "left";
+ }
+
+ void motorRight() {
+   motorA(MOTOR_SPEED, true);
+   motorB(MOTOR_SPEED, false);
+   currentMotorState = "right";
+ }
+
+ // ==================== MQTT Callback (NEW) ====================
+ void mqttCallback(char* topic, byte* payload, unsigned int length) {
+   String msg;
+   for (unsigned int i = 0; i < length; i++) {
+     msg += (char)payload[i];
+   }
+   msg.toLowerCase();
+
+   Serial.printf("MQTT [%s]: %s\n", topic, msg.c_str());
+
+   if (String(topic) == TOPIC_MOTOR_CMD) {
+     if (msg == "forward")       motorForward();
+     else if (msg == "back")     motorBack();
+     else if (msg == "left")     motorLeft();
+     else if (msg == "right")    motorRight();
+     else if (msg == "stop")     motorStop();
+     motorLastCmd = millis();
+   }
+ }
+
+ // ==================== MQTT Connect (NEW) ====================
+ void mqttReconnect() {
+   if (millis() - lastMqttReconnect < 5000) return;  // 5s backoff
+   lastMqttReconnect = millis();
+
+   Serial.print("MQTT connecting...");
+   if (mqttClient.connect(mqtt_client_id, mqtt_user, mqtt_pass)) {
+     Serial.println("connected!");
+     mqttClient.subscribe(TOPIC_MOTOR_CMD);
+     // Announce online
+     mqttClient.publish(TOPIC_HEARTBEAT, "{\"status\":\"online\"}");
+   } else {
+     Serial.printf("failed (rc=%d)\n", mqttClient.state());
+   }
+ }
+
+ // ==================== HTTP Handlers ====================
+ void handleMotor() {
+   controlServer.sendHeader("Access-Control-Allow-Origin", "*");
+
+   if (!controlServer.hasArg("dir")) {
+     controlServer.send(400, "application/json", "{\"error\":\"missing dir param\"}");
+     return;
+   }
+
+   String dir = controlServer.arg("dir");
+   dir.toLowerCase();
+
+   if (dir == "forward")     motorForward();
+   else if (dir == "back")   motorBack();
+   else if (dir == "left")   motorLeft();
+   else if (dir == "right")  motorRight();
+   else if (dir == "stop")   motorStop();
+   else {
+     controlServer.send(400, "application/json", "{\"error\":\"invalid direction\"}");
+     return;
+   }
+
+   motorLastCmd = millis();
+   controlServer.send(200, "application/json",
+     "{\"status\":\"ok\",\"direction\":\"" + dir + "\"}");
+ }
+
+ void handleStatus() {
+   controlServer.sendHeader("Access-Control-Allow-Origin", "*");
+
+   long rssi = WiFi.RSSI();
+   unsigned long uptime = millis() / 1000;
+
+   String json = "{";
+   json += "\"rssi\":" + String(rssi) + ",";
+   json += "\"uptime\":" + String(uptime) + ",";
+   json += "\"motor\":\"" + currentMotorState + "\",";
+   json += "\"ip\":\"" + WiFi.localIP().toString() + "\",";
+   json += "\"mqtt\":" + String(mqttClient.connected() ? "true" : "false");
+   json += "}";
+
+   controlServer.send(200, "application/json", json);
+ }
+
+ void handleRoot() {
+   controlServer.sendHeader("Access-Control-Allow-Origin", "*");
+   controlServer.send(200, "text/html",
+     "<h1>DogBot ESP32-CAM</h1>"
+     "<p>Stream: <a href='http://" + WiFi.localIP().toString() + ":81/stream'>MJPEG</a></p>"    
+     "<p>Motor: /motor?dir=forward|back|left|right|stop</p>"
+     "<p>Status: /status</p>"
+     "<p>MQTT: " + String(mqttClient.connected() ? "CONNECTED" : "DISCONNECTED") + "</p>");     
+ }
+
+ // ==================== MJPEG Stream ====================
+ void streamTask(void* pvParameters) {
+   WiFiClient client;
+
+   while (true) {
+     client = streamServer.available();
+     if (client) {
+       String request = client.readStringUntil('\r');
+       client.flush();
+
+       client.println("HTTP/1.1 200 OK");
+       client.println("Content-Type: multipart/x-mixed-replace; boundary=frame");
+       client.println("Access-Control-Allow-Origin: *");
+       client.println("Cache-Control: no-cache");
+       client.println("Connection: keep-alive");
+       client.println();
+
+       while (client.connected()) {
+         camera_fb_t* fb = esp_camera_fb_get();
+         if (!fb) {
+           Serial.println("Camera capture failed");
+           delay(100);
+           continue;
+         }
+
+         client.printf("--frame\r\n");
+         client.printf("Content-Type: image/jpeg\r\n");
+         client.printf("Content-Length: %u\r\n\r\n", fb->len);
+         client.write(fb->buf, fb->len);
+         client.printf("\r\n");
+
+         esp_camera_fb_return(fb);
+
+         if (!client.connected()) break;
+         delay(33);
+       }
+
+       client.stop();
+     }
+     delay(10);
+   }
+ }
+
+ // ==================== Camera Init ====================
+ bool cameraInit() {
+   camera_config_t config;
+   config.ledc_channel = LEDC_CHANNEL_2;
+   config.ledc_timer = LEDC_TIMER_1;
+   config.pin_d0 = Y2_GPIO_NUM;
+   config.pin_d1 = Y3_GPIO_NUM;
+   config.pin_d2 = Y4_GPIO_NUM;
+   config.pin_d3 = Y5_GPIO_NUM;
+   config.pin_d4 = Y6_GPIO_NUM;
+   config.pin_d5 = Y7_GPIO_NUM;
+   config.pin_d6 = Y8_GPIO_NUM;
+   config.pin_d7 = Y9_GPIO_NUM;
+   config.pin_xclk = XCLK_GPIO_NUM;
+   config.pin_pclk = PCLK_GPIO_NUM;
+   config.pin_vsync = VSYNC_GPIO_NUM;
+   config.pin_href = HREF_GPIO_NUM;
+   config.pin_sccb_sda = SIOD_GPIO_NUM;
+   config.pin_sccb_scl = SIOC_GPIO_NUM;
+   config.pin_pwdn = PWDN_GPIO_NUM;
+   config.pin_reset = RESET_GPIO_NUM;
+   config.xclk_freq_hz = 20000000;
+   config.pixel_format = PIXFORMAT_JPEG;
+   config.frame_size = FRAMESIZE_VGA;
+   config.jpeg_quality = 12;
+   config.fb_count = 2;
+   config.grab_mode = CAMERA_GRAB_LATEST;
+
+   esp_err_t err = esp_camera_init(&config);
+   if (err != ESP_OK) {
+     Serial.printf("Camera init failed: 0x%x\n", err);
+     return false;
+   }
+
+   sensor_t* s = esp_camera_sensor_get();
+   s->set_brightness(s, 1);
+   s->set_saturation(s, -1);
+   s->set_whitebal(s, 1);
+   s->set_awb_gain(s, 1);
+
+   return true;
+ }
+
+ // ==================== Setup ====================
+ void setup() {
+   Serial.begin(115200);
+   Serial.println("\n=== DogBot Recon System ===");
+
+   // Init camera
+   if (!cameraInit()) {
+     Serial.println("FATAL: Camera init failed!");
+     while (true) delay(1000);
+   }
+   Serial.println("Camera: OK");
+
+   // Init motors
+   motorSetup();
+   Serial.println("Motors: OK");
+
+   // Connect WiFi
+   WiFi.mode(WIFI_STA);
+   WiFi.begin(ssid, password);
+   Serial.print("WiFi connecting");
+   int attempts = 0;
+   while (WiFi.status() != WL_CONNECTED && attempts < 30) {
+     delay(500);
+     Serial.print(".");
+     attempts++;
+   }
+
+   if (WiFi.status() != WL_CONNECTED) {
+     Serial.println("\nFATAL: WiFi connection failed!");
+     while (true) delay(1000);
+   }
+
+   Serial.println("\nWiFi: OK");
+   Serial.print("IP: ");
+   Serial.println(WiFi.localIP());
+
+   // Setup HTTP routes
+   controlServer.on("/", handleRoot);
+   controlServer.on("/motor", handleMotor);
+   controlServer.on("/status", handleStatus);
+   controlServer.begin();
+   Serial.println("Control server: port 80");
+
+   // Start MJPEG stream server
+   streamServer.begin();
+   Serial.println("Stream server: port 81");
+
+   // Run stream on core 0
+   xTaskCreatePinnedToCore(streamTask, "stream", 8192, NULL, 1, NULL, 0);
+
+   // ==================== MQTT Setup (NEW) ====================
+   espSecureClient.setInsecure();  // Skip certificate validation (for simplicity)
+   mqttClient.setServer(mqtt_server, mqtt_port);
+   mqttClient.setCallback(mqttCallback);
+   mqttClient.setBufferSize(512);  // Enough for motor commands + status JSON
+   mqttReconnect();
+   Serial.println("MQTT: initialized");
+
+   Serial.println("=== DogBot Ready ===");
+   Serial.printf("Stream: http://%s:81/stream\n", WiFi.localIP().toString().c_str());
+   Serial.printf("Control: http://%s/motor?dir=forward\n", WiFi.localIP().toString().c_str());  
+   Serial.printf("MQTT: %s:%d\n", mqtt_server, mqtt_port);
+ }
+
+ // ==================== Loop ====================
+ void loop() {
+   controlServer.handleClient();
+
+   // MQTT keep-alive and reconnect (NEW)
+   if (!mqttClient.connected()) {
+     mqttReconnect();
+   }
+   mqttClient.loop();
+
+   // Publish status every 2 seconds via MQTT (NEW)
+   if (mqttClient.connected() && (millis() - lastStatusPublish > 2000)) {
+     String json = "{\"rssi\":" + String(WiFi.RSSI()) +
+                   ",\"uptime\":" + String(millis() / 1000) +
+                   ",\"motor\":\"" + currentMotorState +
+                   "\",\"ip\":\"" + WiFi.localIP().toString() + "\"}";
+     mqttClient.publish(TOPIC_STATUS, json.c_str());
+     lastStatusPublish = millis();
+   }
+
+   // Auto-stop safety
+   if (currentMotorState != "stop" && (millis() - motorLastCmd > 2000)) {
+     motorStop();
+     Serial.println("Auto-stop: no command timeout");
+   }
+
+   delay(1);
+ }
+
+ 2C. Flash the Firmware
+
+ 1. Connect ESP32-CAM to PC via USB-TTL adapter (IO0 to GND for flash mode)
+ 2. Select Board: "AI Thinker ESP32-CAM" in Arduino IDE
+ 3. Upload the sketch
+ 4. Remove IO0-GND jumper, press reset
+ 5. Open Serial Monitor at 115200 baud
+ 6. Verify you see:
+ === DogBot Recon System ===
+ Camera: OK
+ Motors: OK
+ WiFi: OK
+ IP: 192.168.1.xxx
+ Control server: port 80
+ Stream server: port 81
+ MQTT connecting...connected!
+ MQTT: initialized
+ === DogBot Ready ===
+
+ ---
+ STEP 3: Chennai PC Setup (Cloudflare Tunnel for Video)
+
+ This PC must be on the same WiFi network as the ESP32.
+
+ 3A. Install cloudflared
+
+ Windows:
+ # Option 1: Download from
+ https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/   
+
+ # Option 2: Using winget
+ https://learn.microsoft.com/en-us/windows/package-manager/winget/
+ winget install Cloudflare.cloudflared
+
+ Linux/Raspberry Pi:
+ curl -L
+ https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64 -o  
+ cloudflared
+ chmod +x cloudflared
+ sudo mv cloudflared /usr/local/bin/
+
+ 3B. Start the Tunnel
+
+ Open a terminal on the Chennai PC and run:
+
+ cloudflared tunnel --url http://192.168.1.100:81
+
+ Replace 192.168.1.100 with the ESP32's actual IP (shown in Serial Monitor).
+
+ You'll see output like:
+ +--------------------------------------------------------------------------------------------+ 
+ |  Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):  | 
+ |  https://random-words-here.trycloudflare.com                                               | 
+ +--------------------------------------------------------------------------------------------+ 
+
+ Copy that URL - this is your public video stream URL.
+
+ 3C. Keep it Running
+
+ The tunnel must stay open. Options:
+ - Simple: Keep the terminal open on the Chennai PC
+ - Better (Windows): Create a .bat file and add to Startup folder:
+ @echo off
+ cloudflared tunnel --url http://192.168.1.100:81
+ - Better (Linux): Create a systemd service:
+ sudo tee /etc/systemd/system/dogbot-tunnel.service << 'EOF'
+ [Unit]
+ Description=DogBot Video Tunnel
+ After=network.target
+
+ [Service]
+ ExecStart=/usr/local/bin/cloudflared tunnel --url http://192.168.1.100:81
+ Restart=always
+ RestartSec=5
+
+ [Install]
+ WantedBy=multi-user.target
+ EOF
+
+ sudo systemctl enable dogbot-tunnel
+ sudo systemctl start dogbot-tunnel
+
+ 3D. Note About Tunnel URL
+
+ The free quick tunnel gives a random URL each time you restart. If you want a fixed URL:       
+ 1. Create a Cloudflare account
+ 2. Add a domain (or use a free one)
+ 3. Create a named tunnel:
+ cloudflared tunnel login
+ cloudflared tunnel create dogbot
+ cloudflared tunnel route dns dogbot dogbot-cam.yourdomain.com
+ cloudflared tunnel run --url http://192.168.1.100:81 dogbot
+
+ ---
+ STEP 4: Bangalore Backend Changes
+
+ These are the code changes on your Bangalore laptop.
+
+ 4A. New File: backend/services/mqtt_bridge.py
+
+ import asyncio
+ import json
+ import logging
+
+ import aiomqtt
+
+ from backend.config import settings
+
+ logger = logging.getLogger("dogbot.mqtt")
+
+
+ class MQTTBridge:
+     """Bridges MQTT broker to DogBot backend for remote ESP32 control."""
+
+     def __init__(self):
+         self._connected = False
+         self._client: aiomqtt.Client | None = None
+         self._listen_task: asyncio.Task | None = None
+         self._last_status: dict = {}
+         self._last_heartbeat: float = 0
+
+     @property
+     def connected(self) -> bool:
+         return self._connected
+
+     @property
+     def esp32_online(self) -> bool:
+         """True if we received a heartbeat/status recently."""
+         import time
+         return (time.time() - self._last_heartbeat) < 10
+
+     @property
+     def last_status(self) -> dict:
+         return self._last_status
+
+     async def start(self):
+         if not settings.mqtt_broker_host:
+             logger.info("MQTT not configured, skipping")
+             return
+         self._listen_task = asyncio.create_task(self._listen_loop())
+         logger.info(f"MQTT bridge starting ->
+ {settings.mqtt_broker_host}:{settings.mqtt_broker_port}")
+
+     async def stop(self):
+         if self._listen_task:
+             self._listen_task.cancel()
+             try:
+                 await self._listen_task
+             except asyncio.CancelledError:
+                 pass
+         logger.info("MQTT bridge stopped")
+
+     async def _listen_loop(self):
+         """Connect to MQTT broker and listen for ESP32 status messages."""
+         import time
+         while True:
+             try:
+                 tls_params = aiomqtt.TLSParameters() if settings.mqtt_use_tls else None        
+                 async with aiomqtt.Client(
+                     hostname=settings.mqtt_broker_host,
+                     port=settings.mqtt_broker_port,
+                     username=settings.mqtt_username,
+                     password=settings.mqtt_password,
+                     tls_params=tls_params,
+                 ) as client:
+                     self._client = client
+                     self._connected = True
+                     logger.info("MQTT connected to broker")
+
+                     await client.subscribe("dogbot/status")
+                     await client.subscribe("dogbot/heartbeat")
+
+                     async for message in client.messages:
+                         topic = str(message.topic)
+                         try:
+                             payload = message.payload.decode()
+                         except Exception:
+                             continue
+
+                         if topic == "dogbot/status":
+                             self._last_status = json.loads(payload)
+                             self._last_heartbeat = time.time()
+                         elif topic == "dogbot/heartbeat":
+                             self._last_heartbeat = time.time()
+                             logger.debug("ESP32 heartbeat received")
+
+             except asyncio.CancelledError:
+                 raise
+             except Exception as e:
+                 self._connected = False
+                 self._client = None
+                 logger.warning(f"MQTT disconnected: {e}, reconnecting in 5s")
+                 await asyncio.sleep(5)
+
+     async def send_motor_command(self, direction: str) -> bool:
+         """Publish motor command to ESP32 via MQTT."""
+         if not self._client or not self._connected:
+             return False
+         try:
+             await self._client.publish("dogbot/cmd/motor", direction)
+             logger.debug(f"MQTT motor cmd: {direction}")
+             return True
+         except Exception as e:
+             logger.error(f"MQTT motor cmd failed: {e}")
+             return False
+
+ 4B. Update backend/config.py
+
+ Add MQTT settings after the ESP32 section:
+
+     # ESP32-CAM
+     esp32_stream_url: str = "http://192.168.1.100:81/stream"
+     esp32_control_url: str = "http://192.168.1.100"
+     esp32_timeout: float = 5.0
+
+     # MQTT Remote Control (NEW)
+     mqtt_broker_host: str = ""           # e.g., "abc123.s1.eu.hivemq.cloud"
+     mqtt_broker_port: int = 8883
+     mqtt_username: str = ""              # e.g., "dogbot-esp32"
+     mqtt_password: str = ""              # e.g., "DogBot@2026!Secure"
+     mqtt_use_tls: bool = True
+
+ 4C. Update backend/services/esp32_client.py
+
+ Modify the ESP32Client class to accept and use MQTT bridge:
+
+ class ESP32Client:
+     def __init__(self, mqtt_bridge=None):          # CHANGED
+         self._frame: np.ndarray | None = None
+         self._frame_lock = asyncio.Lock()
+         self._running = False
+         self._connected = False
+         self._esp32_connected = False
+         self._webcam_active = False
+         self._http_client: httpx.AsyncClient | None = None
+         self._capture_task: asyncio.Task | None = None
+         self._webcam_task: asyncio.Task | None = None
+         self._rssi: int = 0
+         self._webcam: cv2.VideoCapture | None = None
+         self._source: str = "none"
+         self._mqtt_bridge = mqtt_bridge              # NEW
+
+ Update send_motor_command method:
+
+     async def send_motor_command(self, direction: str) -> bool:
+         # Try MQTT first (works remotely)                    # NEW
+         if self._mqtt_bridge and self._mqtt_bridge.connected:  # NEW
+             return await self._mqtt_bridge.send_motor_command(direction)  # NEW
+
+         # Fall back to HTTP (local network only)
+         if not self._http_client:
+             return False
+         try:
+             url = f"{settings.esp32_control_url}/motor?dir={direction}"
+             response = await self._http_client.get(url, timeout=0.5)
+             return response.status_code == 200
+         except Exception as e:
+             logger.error(f"Motor command failed: {e}")
+             return False
+
+ Update get_status method:
+
+     async def get_status(self) -> dict | None:
+         # Try MQTT status first (works remotely)          # NEW
+         if self._mqtt_bridge and self._mqtt_bridge.connected:  # NEW
+             status = self._mqtt_bridge.last_status           # NEW
+             if status:                                        # NEW
+                 self._rssi = status.get("rssi", 0)           # NEW
+                 return status                                 # NEW
+
+         # Fall back to HTTP
+         if not self._http_client:
+             return None
+         try:
+             url = f"{settings.esp32_control_url}/status"
+             response = await self._http_client.get(url, timeout=1.0)
+             if response.status_code == 200:
+                 data = response.json()
+                 self._rssi = data.get("rssi", 0)
+                 return data
+         except Exception as e:
+             logger.debug(f"Status request failed: {e}")
+         return None
+
+ 4D. Update backend/main.py
+
+ import logging
+ from contextlib import asynccontextmanager
+
+ from fastapi import FastAPI
+ from fastapi.staticfiles import StaticFiles
+ from fastapi.responses import FileResponse
+
+ from backend.config import settings
+ from backend.services.esp32_client import ESP32Client
+ from backend.services.mqtt_bridge import MQTTBridge        # NEW
+ from backend.services.cv_pipeline import CVPipeline
+ from backend.services.ml_detector import MLDetector
+ from backend.services.ai_decision import AIDecisionEngine
+ from backend.services.frame_manager import FrameManager
+
+ from backend.routers import video_ws, control_ws, api
+
+ # Logging
+ logging.basicConfig(
+     level=logging.INFO,
+     format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
+     datefmt="%H:%M:%S"
+ )
+ logger = logging.getLogger("dogbot")
+
+ # Service instances
+ mqtt_bridge = MQTTBridge()                                  # NEW
+ esp32 = ESP32Client(mqtt_bridge=mqtt_bridge)                # CHANGED
+ cv_pipeline = CVPipeline()
+ ml_detector = MLDetector()
+ ai_engine = AIDecisionEngine()
+ frame_mgr = FrameManager(esp32, cv_pipeline, ml_detector, ai_engine)
+
+
+ @asynccontextmanager
+ async def lifespan(app: FastAPI):
+     """Startup and shutdown lifecycle."""
+     logger.info("=== DogBot Recon System Starting ===")
+
+     # Wire up services to routers
+     video_ws.set_frame_manager(frame_mgr)
+     control_ws.set_services(esp32, ai_engine, frame_mgr)
+     api.set_services(esp32, ai_engine, frame_mgr)
+
+     # Register callbacks
+     ai_engine.set_on_decision(control_ws.on_ai_decision)
+     frame_mgr.on_alert(control_ws.on_detection_alert)
+
+     # Start services
+     await mqtt_bridge.start()                               # NEW
+     await esp32.start()
+     await ml_detector.start()
+     await ai_engine.start()
+     await frame_mgr.start()
+
+     logger.info("=== All Systems Online ===")
+     logger.info(f"Dashboard: http://{settings.app_host}:{settings.app_port}")
+     logger.info(f"ESP32 Stream: {settings.esp32_stream_url}")
+     if settings.mqtt_broker_host:                           # NEW
+         logger.info(f"MQTT Broker: {settings.mqtt_broker_host}:{settings.mqtt_broker_port}")   
+
+     yield
+
+     # Shutdown
+     logger.info("=== Shutting Down ===")
+     await frame_mgr.stop()
+     await ai_engine.stop()
+     await esp32.stop()
+     await mqtt_bridge.stop()                                # NEW
+     logger.info("=== Shutdown Complete ===")
+
+
+ app = FastAPI(
+     title="DogBot Recon System",
+     version="1.0.0",
+     lifespan=lifespan
+ )
+
+ app.include_router(video_ws.router)
+ app.include_router(control_ws.router)
+ app.include_router(api.router)
+
+ app.mount("/static", StaticFiles(directory="backend/static"), name="static")
+
+
+ @app.get("/")
+ async def serve_dashboard():
+     return FileResponse("backend/static/index.html")
+
+
+ if __name__ == "__main__":
+     import uvicorn
+     uvicorn.run(
+         "backend.main:app",
+         host=settings.app_host,
+         port=settings.app_port,
+         reload=False
+     )
+
+ 4E. Update requirements.txt
+
+ Add at the end:
+ aiomqtt>=2.0.0
+
+ 4F. Update .env on Bangalore laptop
+
+ # ESP32-CAM Configuration
+ # Point to Cloudflare Tunnel URL (from Step 3B)
+ ESP32_STREAM_URL=https://random-words-here.trycloudflare.com
+ ESP32_CONTROL_URL=http://192.168.1.100
+ ESP32_TIMEOUT=10.0
+
+ # MQTT Remote Control (NEW)
+ MQTT_BROKER_HOST=abc123def456.s1.eu.hivemq.cloud
+ MQTT_BROKER_PORT=8883
+ MQTT_USERNAME=dogbot-esp32
+ MQTT_PASSWORD=DogBot@2026!Secure
+ MQTT_USE_TLS=true
+
+ # ... rest of your existing .env stays the same ...
+
+ 4G. Install new dependency
+
+ pip install aiomqtt>=2.0.0
+
+ ---
+ STEP 5: Testing (End-to-End Verification)
+
+ Test 1: Verify ESP32 MQTT Connection
+
+ 1. Power on ESP32 in Chennai
+ 2. Open Arduino Serial Monitor
+ 3. Confirm: MQTT connecting...connected!
+ 4. If it says failed (rc=-2), check your broker URL and credentials
+
+ Test 2: Verify Tunnel
+
+ 1. On Chennai PC, run cloudflared tunnel --url http://192.168.1.100:81
+ 2. Copy the public URL
+ 3. On Bangalore laptop, open that URL in a browser
+ 4. You should see the MJPEG video stream from the ESP32 camera
+
+ Test 3: Verify MQTT Motor Commands
+
+ 1. On Bangalore laptop, install an MQTT test client:
+ pip install paho-mqtt
+ python -c "
+ import paho.mqtt.client as mqtt
+ import ssl
+ c = mqtt.Client()
+ c.tls_set()
+ c.username_pw_set('dogbot-esp32', 'DogBot@2026!Secure')
+ c.connect('abc123def456.s1.eu.hivemq.cloud', 8883)
+ c.publish('dogbot/cmd/motor', 'forward')
+ c.disconnect()
+ print('Command sent!')
+ "
+ 2. The ESP32 motors should start moving forward (and auto-stop after 2s)
+
+ Test 4: Full Dashboard Test
+
+ 1. Update .env with tunnel URL and MQTT credentials
+ 2. Run: python -m uvicorn backend.main:app
+ 3. Open http://localhost:8000 in browser
+ 4. Verify:
+   - Camera feed shows live video from Chennai
+   - Press W/A/S/D or use D-pad to send motor commands
+   - Motor commands arrive at ESP32 (check Serial Monitor)
+   - Telemetry shows RSSI and motor state from ESP32
+
+ ---
+ Summary: What Goes Where
+
+ ESP32-CAM (Chennai, flashed via USB)
+
+ - Updated esp32cam_dogbot.ino with MQTT client added
+ - Still keeps HTTP servers for local debugging
+ - Connects outbound to HiveMQ Cloud on boot
+ - Receives motor commands via MQTT
+ - Publishes status every 2s via MQTT
+ - Camera stream still served locally on port 81
+
+ Chennai PC (same WiFi as ESP32)
+
+ - Runs cloudflared tunnel --url http://192.168.1.100:81
+ - Bridges ESP32's local MJPEG stream to the internet
+ - No code to write, just run one command
+
+ Bangalore Laptop (your development machine)
+
+ - New file: backend/services/mqtt_bridge.py
+ - Modified: backend/config.py (add MQTT settings)
+ - Modified: backend/services/esp32_client.py (MQTT-first motor commands)
+ - Modified: backend/main.py (wire up MQTTBridge)
+ - Modified: requirements.txt (add aiomqtt)
+ - Modified: .env (tunnel URL + MQTT credentials)
+ - Everything else (CV pipeline, ML, AI, dashboard) stays unchanged
+
+ Cloud (HiveMQ - free, managed)
+
+ - Just a message broker, no code to deploy
+ - Routes MQTT messages between ESP32 and backend

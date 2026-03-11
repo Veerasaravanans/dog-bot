@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOG-BOT | Tactical Command Interface (Print Version)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --bg-tertiary: #eeeeee;
+            --bg-panel: rgba(245, 245, 245, 0.95);
+            --accent-green: #222222;
+            --accent-green-dim: #444444;
+            --accent-green-glow: rgba(0, 0, 0, 0.1);
+            --accent-blue: #333333;
+            --accent-blue-dim: #555555;
+            --accent-cyan: #333333;
+            --accent-orange: #555555;
+            --accent-red: #444444;
+            --accent-red-dim: #666666;
+            --accent-purple: #555555;
+            --accent-yellow: #666666;
+            --text-primary: #111111;
+            --text-secondary: #444444;
+            --text-muted: #888888;
+            --border-color: #cccccc;
+            --border-glow: rgba(0, 0, 0, 0.1);
+            --warning-bg: rgba(0, 0, 0, 0.05);
+            --danger-bg: rgba(0, 0, 0, 0.05);
+            --success-bg: rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* MAIN LAYOUT */
+        .dashboard {
+            display: grid;
+            grid-template-rows: 60px 1fr 100px;
+            grid-template-columns: 1fr 380px;
+            height: 100vh;
+            gap: 0;
+        }
+
+        /* TOP STATUS BAR */
+        .status-bar {
+            grid-column: 1 / -1;
+            background: var(--bg-secondary);
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 25px;
+            position: relative;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: #333;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .logo-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: #111;
+        }
+
+        .logo-subtitle {
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            margin-left: 15px;
+            padding-left: 15px;
+            border-left: 1px solid var(--border-color);
+        }
+
+        .status-indicators {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #333;
+            border: 1px solid #333;
+        }
+
+        .status-dot.offline {
+            background: #ccc;
+            border-color: #999;
+        }
+
+        .status-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+        }
+
+        .status-value {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        .datetime {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .datetime .date {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* VIDEO FEED SECTION */
+        .video-section {
+            background: var(--bg-primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .video-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: #f0f0f0;
+        }
+
+        .video-feed {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-feed img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .video-feed.no-signal {
+            background: linear-gradient(180deg, #f8f8f8 0%, #eee 30%, #f0f0f0 70%, #e8e8e8 100%);
+        }
+
+        /* Corner Brackets */
+        .corner-bracket {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 2px solid #333;
+            opacity: 0.8;
+        }
+
+        .corner-bracket.top-left { top: 20px; left: 20px; border-right: none; border-bottom: none; }
+        .corner-bracket.top-right { top: 20px; right: 20px; border-left: none; border-bottom: none; }
+        .corner-bracket.bottom-left { bottom: 20px; left: 20px; border-right: none; border-top: none; }
+        .corner-bracket.bottom-right { bottom: 20px; right: 20px; border-left: none; border-top: none; }
+
+        /* Crosshair */
+        .crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            pointer-events: none;
+        }
+
+        .crosshair::before, .crosshair::after {
+            content: '';
+            position: absolute;
+            background: #333;
+            opacity: 0.8;
+        }
+
+        .crosshair::before {
+            width: 2px;
+            height: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .crosshair::after {
+            width: 100%;
+            height: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .crosshair-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border: 1px solid #333;
+            border-radius: 50%;
+            opacity: 0.6;
+        }
+
+        .crosshair-dot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            background: #333;
+            border-radius: 50%;
+        }
+
+        /* Grid Overlay */
+        .grid-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .grid-overlay svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* HUD Overlay */
+        .hud-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .hud-top {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 25px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .hud-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hud-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+        }
+
+        .hud-value {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            color: #222;
+        }
+
+        /* Evidence Alert */
+        .evidence-alert { display: none; }
+        .evidence-alert.hidden { display: none; }
+
+        /* Navigation Recommendation */
+        .nav-recommendation {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #333;
+            padding: 12px 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-recommendation.hidden { display: none; }
+
+        .nav-arrow {
+            font-size: 24px;
+            color: #222;
+        }
+
+        .nav-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            color: #222;
+            letter-spacing: 2px;
+        }
+
+        .nav-confidence {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Compass */
+        .compass {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .compass-inner {
+            width: 60px;
+            height: 60px;
+            border: 1px solid #ccc;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .compass-needle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 30px;
+            transform: translate(-50%, -100%) rotate(25deg);
+            background: linear-gradient(to top, #333 50%, #999 50%);
+            border-radius: 2px;
+        }
+
+        .compass-n {
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            color: #333;
+        }
+
+        /* Distance Markers */
+        .distance-marker {
+            position: absolute;
+            left: 20px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            color: #555;
+            opacity: 0.9;
+        }
+
+        .distance-marker.m1 { bottom: 25%; }
+        .distance-marker.m2 { bottom: 40%; }
+        .distance-marker.m3 { bottom: 55%; }
+
+        /* Recording Indicator */
+        .recording-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid #666;
+        }
+
+        .recording-dot {
+            width: 10px;
+            height: 10px;
+            background: #444;
+            border-radius: 50%;
+        }
+
+        .recording-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            color: #444;
+            letter-spacing: 1px;
+        }
+
+        .recording-time {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            color: #444;
+        }
+
+        /* Mini Map */
+        .minimap {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .minimap-grid {
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(#ddd 1px, transparent 1px),
+                linear-gradient(90deg, #ddd 1px, transparent 1px);
+            background-size: 20px 20px;
+            position: relative;
+        }
+
+        .minimap-bot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px;
+            height: 12px;
+            background: #333;
+            border-radius: 50%;
+        }
+
+        .minimap-bot::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 8px solid #333;
+        }
+
+        .minimap-obstacle, .minimap-evidence { display: none; }
+
+        /* Quick Stats */
+        .quick-stats {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .quick-stat {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .quick-stat-icon { font-size: 14px; }
+
+        .quick-stat-value {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            color: #222;
+        }
+
+        /* RIGHT PANEL */
+        .right-panel {
+            background: var(--bg-secondary);
+            border-left: 2px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .panel-section {
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px;
+            flex-shrink: 0;
+        }
+
+        .panel-section:last-child { border-bottom: none; }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .panel-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            color: #222;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-title::before {
+            content: '\25C6';
+            font-size: 8px;
+        }
+
+        /* Mode Toggle */
+        .mode-section {
+            padding: 15px 20px;
+            background: var(--bg-tertiary);
+            flex-shrink: 0;
+        }
+
+        .mode-toggle {
+            display: flex;
+            gap: 0;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            padding: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .mode-btn.active {
+            background: #333;
+            color: #fff;
+        }
+
+        /* D-Pad */
+        .dpad-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .dpad {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            grid-template-rows: repeat(3, 60px);
+            gap: 8px;
+        }
+
+        .dpad-btn {
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dpad-btn.center {
+            background: #eee;
+            border-color: #666;
+            color: #333;
+        }
+
+        .dpad-btn.empty { visibility: hidden; }
+
+        .dpad-btn span {
+            font-size: 10px;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+        }
+
+        /* Speed Control */
+        .speed-control { margin-top: 15px; }
+
+        .speed-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .speed-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+        }
+
+        .speed-value {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 16px;
+            color: #222;
+        }
+
+        .speed-slider-container {
+            position: relative;
+            height: 40px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 0 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .speed-slider {
+            width: 100%;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: #ddd;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #333;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .speed-marks {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            padding: 0 5px;
+        }
+
+        .speed-mark {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 9px;
+            color: var(--text-muted);
+        }
+
+        /* Circular Gauges */
+        .gauge-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 15px 0;
+        }
+
+        .gauge {
+            width: 70px;
+            height: 70px;
+            position: relative;
+        }
+
+        .gauge svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .gauge-bg {
+            fill: none;
+            stroke: #eee;
+            stroke-width: 6;
+        }
+
+        .gauge-fill {
+            fill: none;
+            stroke: #333;
+            stroke-width: 6;
+            stroke-linecap: round;
+            stroke-dasharray: 188.5;
+            stroke-dashoffset: 47;
+        }
+
+        .gauge-fill.warning { stroke: #666; }
+        .gauge-fill.danger { stroke: #999; }
+
+        .gauge-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .gauge-number {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 16px;
+            color: var(--text-primary);
+        }
+
+        .gauge-label {
+            font-size: 8px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+        }
+
+        /* Lane Status */
+        .lane-section {
+            padding: 15px 20px;
+            background: var(--bg-tertiary);
+            flex-shrink: 0;
+        }
+
+        .lane-status {
+            display: flex;
+            gap: 10px;
+        }
+
+        .lane {
+            flex: 1;
+            text-align: center;
+            padding: 12px 10px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+        }
+
+        .lane.clear {
+            border-color: #333;
+            background: #f5f5f5;
+        }
+
+        .lane-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .lane-icon {
+            font-size: 20px;
+        }
+
+        .lane.clear .lane-icon { color: #333; }
+
+        /* AI Reasoning Log */
+        .log-section {
+            flex: 0 0 auto;
+            display: flex;
+            flex-direction: column;
+            min-height: 200px;
+            max-height: 300px;
+        }
+
+        .log-container {
+            flex: 1;
+            overflow-y: auto;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            line-height: 1.6;
+            max-height: 220px;
+        }
+
+        .log-entry {
+            padding: 6px 8px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+            border-left: 3px solid #999;
+            background: #f8f8f8;
+        }
+
+        .log-entry.obs { border-left-color: #555; }
+        .log-entry.ana { border-left-color: #777; }
+        .log-entry.dec { border-left-color: #666; }
+        .log-entry.act { border-left-color: #333; }
+        .log-entry.evd { border-left-color: #444; }
+
+        .log-time {
+            color: var(--text-muted);
+            margin-right: 8px;
+        }
+
+        .log-type {
+            font-weight: 600;
+            margin-right: 8px;
+            color: #333;
+        }
+
+        .log-message { color: var(--text-secondary); }
+
+        /* Keyboard Hints */
+        .keyboard-hints {
+            padding: 10px 20px;
+            padding-bottom: 20px;
+            background: var(--bg-primary);
+            border-top: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .keyboard-row:last-child { margin-bottom: 0; }
+
+        .key {
+            min-width: 35px;
+            height: 30px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: #555;
+        }
+
+        .key.wide { min-width: 80px; }
+
+        /* BOTTOM TELEMETRY BAR */
+        .telemetry-bar {
+            grid-column: 1 / -1;
+            background: var(--bg-secondary);
+            border-top: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 25px;
+            gap: 20px;
+        }
+
+        .telemetry-group {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            padding: 15px 25px;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .telemetry-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            min-width: 80px;
+        }
+
+        .telemetry-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 9px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+        }
+
+        .telemetry-value {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 18px;
+            color: #222;
+            display: flex;
+            align-items: baseline;
+            gap: 3px;
+        }
+
+        .telemetry-unit {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Signal Bars */
+        .signal-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 20px;
+        }
+
+        .signal-bar {
+            width: 4px;
+            background: #bbb;
+            border-radius: 1px;
+        }
+
+        .signal-bar:nth-child(1) { height: 20%; }
+        .signal-bar:nth-child(2) { height: 40%; }
+        .signal-bar:nth-child(3) { height: 60%; }
+        .signal-bar:nth-child(4) { height: 80%; }
+        .signal-bar:nth-child(5) { height: 100%; }
+
+        .signal-bar.inactive { background: #ddd; }
+
+        /* Battery */
+        .battery {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .battery-icon {
+            width: 30px;
+            height: 14px;
+            border: 2px solid #333;
+            border-radius: 3px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 2px;
+        }
+
+        .battery-icon::after {
+            content: '';
+            position: absolute;
+            right: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 6px;
+            background: #333;
+            border-radius: 0 2px 2px 0;
+        }
+
+        .battery-level {
+            height: 100%;
+            background: #333;
+            border-radius: 1px;
+            width: 75%;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            margin-left: auto;
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 12px 20px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn.danger {
+            border-color: #666;
+            color: #333;
+        }
+
+        /* Print Styles */
+        @media print {
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .dashboard { height: auto; }
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .dashboard { grid-template-columns: 1fr 320px; }
+        }
+
+        @media (max-width: 900px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                grid-template-rows: 60px 50vh auto auto;
+            }
+            .right-panel { border-left: none; border-top: 1px solid var(--border-color); }
+            .telemetry-bar { flex-wrap: wrap; padding: 15px; }
+            .telemetry-group { flex: 1; min-width: 200px; }
+            .action-buttons { width: 100%; margin-top: 10px; margin-left: 0; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+
+        <!-- TOP STATUS BAR -->
+        <header class="status-bar">
+            <div class="logo-section">
+                <div class="logo">
+                    <div class="logo-icon">&#x1F415;</div>
+                    <span class="logo-text">DOG-BOT</span>
+                </div>
+                <span class="logo-subtitle">TACTICAL RECONNAISSANCE UNIT</span>
+            </div>
+
+            <div class="status-indicators">
+                <div class="status-item">
+                    <div class="status-dot"></div>
+                    <div>
+                        <div class="status-label">CAMERA</div>
+                        <div class="status-value">ONLINE</div>
+                    </div>
+                </div>
+                <div class="status-item">
+                    <div class="status-dot"></div>
+                    <div>
+                        <div class="status-label">MOTOR CTRL</div>
+                        <div class="status-value">ONLINE</div>
+                    </div>
+                </div>
+                <div class="status-item">
+                    <div class="status-dot offline"></div>
+                    <div>
+                        <div class="status-label">AI ENGINE</div>
+                        <div class="status-value">STANDBY</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="datetime">
+                <span>14:32:07</span>
+                <span class="date">2026.02.15</span>
+            </div>
+        </header>
+
+        <!-- VIDEO FEED SECTION -->
+        <main class="video-section">
+            <div class="video-container">
+                <div class="video-feed no-signal">
+
+                    <!-- Grid Overlay -->
+                    <div class="grid-overlay">
+                        <svg viewBox="0 0 640 480" preserveAspectRatio="none">
+                            <line x1="320" y1="140" x2="0" y2="480" stroke="#888" stroke-width="1" opacity="0.4"/>
+                            <line x1="320" y1="140" x2="160" y2="480" stroke="#888" stroke-width="1" opacity="0.4"/>
+                            <line x1="320" y1="140" x2="320" y2="480" stroke="#555" stroke-width="1.5" opacity="0.6"/>
+                            <line x1="320" y1="140" x2="480" y2="480" stroke="#888" stroke-width="1" opacity="0.4"/>
+                            <line x1="320" y1="140" x2="640" y2="480" stroke="#888" stroke-width="1" opacity="0.4"/>
+                            <line x1="100" y1="380" x2="540" y2="380" stroke="#888" stroke-width="1" opacity="0.3"/>
+                            <line x1="150" y1="320" x2="490" y2="320" stroke="#888" stroke-width="1" opacity="0.3"/>
+                            <line x1="200" y1="260" x2="440" y2="260" stroke="#888" stroke-width="1" opacity="0.3"/>
+                            <line x1="250" y1="200" x2="390" y2="200" stroke="#888" stroke-width="1" opacity="0.3"/>
+                        </svg>
+                    </div>
+
+                    <!-- Corner Brackets -->
+                    <div class="corner-bracket top-left"></div>
+                    <div class="corner-bracket top-right"></div>
+                    <div class="corner-bracket bottom-left"></div>
+                    <div class="corner-bracket bottom-right"></div>
+
+                    <!-- Crosshair -->
+                    <div class="crosshair">
+                        <div class="crosshair-circle"></div>
+                        <div class="crosshair-dot"></div>
+                    </div>
+
+                    <!-- Distance Markers -->
+                    <div class="distance-marker m1">0.5m</div>
+                    <div class="distance-marker m2">1.0m</div>
+                    <div class="distance-marker m3">2.0m</div>
+
+                    <!-- HUD Overlay -->
+                    <div class="hud-overlay">
+                        <div class="hud-top">
+                            <div class="hud-item">
+                                <span class="hud-label">FPS</span>
+                                <span class="hud-value">15.0</span>
+                            </div>
+                            <div class="hud-item">
+                                <span class="hud-label">LATENCY</span>
+                                <span class="hud-value">12<small>ms</small></span>
+                            </div>
+                            <div class="hud-item">
+                                <span class="hud-label">MODE</span>
+                                <span class="hud-value">MANUAL</span>
+                            </div>
+                            <div class="hud-item">
+                                <span class="hud-label">OBSTACLES</span>
+                                <span class="hud-value">0</span>
+                            </div>
+                            <div class="hud-item">
+                                <span class="hud-label">EVIDENCE</span>
+                                <span class="hud-value">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Compass -->
+                    <div class="compass">
+                        <div class="compass-inner">
+                            <div class="compass-needle"></div>
+                            <span class="compass-n">N</span>
+                        </div>
+                    </div>
+
+                    <!-- Recording Indicator -->
+                    <div class="recording-indicator">
+                        <div class="recording-dot"></div>
+                        <span class="recording-text">REC</span>
+                        <span class="recording-time">00:00:00</span>
+                    </div>
+
+                    <!-- Mini Map -->
+                    <div class="minimap">
+                        <div class="minimap-grid">
+                            <div class="minimap-bot"></div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="quick-stats">
+                        <div class="quick-stat">
+                            <span class="quick-stat-icon">&#x1F4CF;</span>
+                            <span class="quick-stat-value">0.0m</span>
+                        </div>
+                        <div class="quick-stat">
+                            <span class="quick-stat-icon">&#x1F550;</span>
+                            <span class="quick-stat-value">00:00:00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- RIGHT CONTROL PANEL -->
+        <aside class="right-panel">
+
+            <!-- Mode Toggle -->
+            <div class="mode-section">
+                <div class="mode-toggle">
+                    <button class="mode-btn active">
+                        <span>&#x1F3AE;</span> MANUAL
+                    </button>
+                    <button class="mode-btn">
+                        <span>&#x1F916;</span> SEMI-AUTO
+                    </button>
+                </div>
+            </div>
+
+            <!-- Control Section -->
+            <div class="panel-section control-section">
+                <div class="panel-header">
+                    <span class="panel-title">MOVEMENT CONTROL</span>
+                </div>
+
+                <!-- D-Pad -->
+                <div class="dpad-container">
+                    <div class="dpad">
+                        <div class="dpad-btn empty"></div>
+                        <button class="dpad-btn">&#9650;</button>
+                        <div class="dpad-btn empty"></div>
+
+                        <button class="dpad-btn">&#9664;</button>
+                        <button class="dpad-btn center"><span>STOP</span></button>
+                        <button class="dpad-btn">&#9654;</button>
+
+                        <div class="dpad-btn empty"></div>
+                        <button class="dpad-btn">&#9660;</button>
+                        <div class="dpad-btn empty"></div>
+                    </div>
+                </div>
+
+                <!-- Speed Control -->
+                <div class="speed-control">
+                    <div class="speed-header">
+                        <span class="speed-label">SPEED</span>
+                        <span class="speed-value">180</span>
+                    </div>
+                    <div class="speed-slider-container">
+                        <input type="range" class="speed-slider" min="50" max="255" value="180">
+                    </div>
+                    <div class="speed-marks">
+                        <span class="speed-mark">50</span>
+                        <span class="speed-mark">150</span>
+                        <span class="speed-mark">255</span>
+                    </div>
+                </div>
+
+                <!-- Gauges -->
+                <div class="gauge-container">
+                    <div class="gauge">
+                        <svg viewBox="0 0 70 70">
+                            <circle class="gauge-bg" cx="35" cy="35" r="30"/>
+                            <circle class="gauge-fill" cx="35" cy="35" r="30"/>
+                        </svg>
+                        <div class="gauge-value">
+                            <div class="gauge-number">25%</div>
+                            <div class="gauge-label">CPU</div>
+                        </div>
+                    </div>
+                    <div class="gauge">
+                        <svg viewBox="0 0 70 70">
+                            <circle class="gauge-bg" cx="35" cy="35" r="30"/>
+                            <circle class="gauge-fill warning" cx="35" cy="35" r="30" style="stroke-dashoffset:75;"/>
+                        </svg>
+                        <div class="gauge-value">
+                            <div class="gauge-number">60%</div>
+                            <div class="gauge-label">MEM</div>
+                        </div>
+                    </div>
+                    <div class="gauge">
+                        <svg viewBox="0 0 70 70">
+                            <circle class="gauge-bg" cx="35" cy="35" r="30"/>
+                            <circle class="gauge-fill" cx="35" cy="35" r="30" style="stroke-dashoffset:28;"/>
+                        </svg>
+                        <div class="gauge-value">
+                            <div class="gauge-number">85%</div>
+                            <div class="gauge-label">BAT</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lane Status -->
+            <div class="lane-section">
+                <div class="panel-header">
+                    <span class="panel-title">LANE STATUS</span>
+                </div>
+                <div class="lane-status">
+                    <div class="lane clear">
+                        <div class="lane-label">LEFT</div>
+                        <div class="lane-icon">&#10003;</div>
+                    </div>
+                    <div class="lane clear">
+                        <div class="lane-label">CENTER</div>
+                        <div class="lane-icon">&#10003;</div>
+                    </div>
+                    <div class="lane clear">
+                        <div class="lane-label">RIGHT</div>
+                        <div class="lane-icon">&#10003;</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Reasoning Log -->
+            <div class="panel-section log-section">
+                <div class="panel-header">
+                    <span class="panel-title">AI REASONING LOG</span>
+                </div>
+                <div class="log-container">
+                    <div class="log-entry act">
+                        <span class="log-time">14:32:07</span>
+                        <span class="log-type act">[ACT]</span>
+                        <span class="log-message">System initialized. All services online.</span>
+                    </div>
+                    <div class="log-entry obs">
+                        <span class="log-time">14:32:08</span>
+                        <span class="log-type">[OBS]</span>
+                        <span class="log-message">Camera feed connected. Resolution: 640x480</span>
+                    </div>
+                    <div class="log-entry ana">
+                        <span class="log-time">14:32:09</span>
+                        <span class="log-type">[ANA]</span>
+                        <span class="log-message">Path clear. No obstacles detected in forward corridor.</span>
+                    </div>
+                    <div class="log-entry dec">
+                        <span class="log-time">14:32:10</span>
+                        <span class="log-type">[DEC]</span>
+                        <span class="log-message">Navigation: FORWARD recommended. Confidence: 0.92</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Keyboard Hints -->
+            <div class="keyboard-hints">
+                <div class="keyboard-row">
+                    <div class="key">W</div>
+                </div>
+                <div class="keyboard-row">
+                    <div class="key">A</div>
+                    <div class="key">S</div>
+                    <div class="key">D</div>
+                </div>
+                <div class="keyboard-row">
+                    <div class="key wide">SPACE</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- BOTTOM TELEMETRY BAR -->
+        <footer class="telemetry-bar">
+            <div class="telemetry-group">
+                <div class="telemetry-item">
+                    <span class="telemetry-label">SIGNAL</span>
+                    <div class="signal-bars">
+                        <div class="signal-bar"></div>
+                        <div class="signal-bar"></div>
+                        <div class="signal-bar"></div>
+                        <div class="signal-bar inactive"></div>
+                        <div class="signal-bar inactive"></div>
+                    </div>
+                </div>
+                <div class="telemetry-item">
+                    <span class="telemetry-label">RSSI</span>
+                    <span class="telemetry-value">-65<span class="telemetry-unit">dBm</span></span>
+                </div>
+            </div>
+
+            <div class="telemetry-group">
+                <div class="telemetry-item">
+                    <span class="telemetry-label">BATTERY</span>
+                    <div class="battery">
+                        <div class="battery-icon">
+                            <div class="battery-level" style="width:75%;"></div>
+                        </div>
+                        <span class="telemetry-value">7.4<span class="telemetry-unit">V</span></span>
+                    </div>
+                </div>
+                <div class="telemetry-item">
+                    <span class="telemetry-label">CURRENT</span>
+                    <span class="telemetry-value">0.8<span class="telemetry-unit">A</span></span>
+                </div>
+            </div>
+
+            <div class="telemetry-group">
+                <div class="telemetry-item">
+                    <span class="telemetry-label">SPEED</span>
+                    <span class="telemetry-value">0.0<span class="telemetry-unit">m/s</span></span>
+                </div>
+                <div class="telemetry-item">
+                    <span class="telemetry-label">DIRECTION</span>
+                    <span class="telemetry-value">STOP</span>
+                </div>
+            </div>
+
+            <div class="telemetry-group">
+                <div class="telemetry-item">
+                    <span class="telemetry-label">OBSTACLES</span>
+                    <span class="telemetry-value">0</span>
+                </div>
+                <div class="telemetry-item">
+                    <span class="telemetry-label">EVIDENCE</span>
+                    <span class="telemetry-value">0</span>
+                </div>
+                <div class="telemetry-item">
+                    <span class="telemetry-label">UPTIME</span>
+                    <span class="telemetry-value">00:00:00</span>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-btn">
+                    <span>&#x1F4F7;</span> SNAPSHOT
+                </button>
+                <button class="action-btn">
+                    <span>&#x1F4BE;</span> SAVE LOG
+                </button>
+                <button class="action-btn danger">
+                    <span>&#x1F6D1;</span> E-STOP
+                </button>
+            </div>
+        </footer>
+
+    </div>
+</body>
+</html>

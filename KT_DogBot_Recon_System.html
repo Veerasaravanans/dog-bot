@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DogBot Recon System — Knowledge Transfer Document</title>
+    <style>
+        :root {
+            --bg: #0a0e17;
+            --card: #111827;
+            --border: #1e293b;
+            --accent: #00ff88;
+            --accent2: #38bdf8;
+            --accent3: #f59e0b;
+            --danger: #ef4444;
+            --text: #e2e8f0;
+            --dim: #94a3b8;
+            --code-bg: #1e293b;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            padding: 2rem;
+        }
+        h1 {
+            font-size: 2.4rem;
+            color: var(--accent);
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            color: var(--dim);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+        h2 {
+            font-size: 1.6rem;
+            color: var(--accent2);
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--accent2);
+            padding-left: 0.8rem;
+        }
+        h3 {
+            font-size: 1.2rem;
+            color: var(--accent3);
+            margin-top: 1.5rem;
+            margin-bottom: 0.6rem;
+        }
+        h4 {
+            font-size: 1.05rem;
+            color: var(--accent);
+            margin-top: 1.2rem;
+            margin-bottom: 0.4rem;
+        }
+        p { margin-bottom: 0.8rem; }
+        ul, ol { margin-left: 1.5rem; margin-bottom: 1rem; }
+        li { margin-bottom: 0.35rem; }
+        code {
+            background: var(--code-bg);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9em;
+            color: var(--accent);
+        }
+        pre {
+            background: var(--code-bg);
+            padding: 1rem 1.2rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.88em;
+            line-height: 1.5;
+        }
+        pre code { background: none; padding: 0; color: var(--text); }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.4rem;
+            margin-bottom: 1.2rem;
+        }
+        .card.highlight {
+            border-left: 4px solid var(--accent);
+        }
+        .card.warn {
+            border-left: 4px solid var(--danger);
+        }
+        .card.info {
+            border-left: 4px solid var(--accent2);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.2rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.6rem 0.8rem;
+            text-align: left;
+        }
+        th {
+            background: var(--code-bg);
+            color: var(--accent2);
+            font-weight: 600;
+        }
+        td code { font-size: 0.85em; }
+        .toc {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+        }
+        .toc h2 { margin-top: 0; border: none; padding: 0; }
+        .toc ol { counter-reset: toc; }
+        .toc a { color: var(--accent2); text-decoration: none; }
+        .toc a:hover { text-decoration: underline; color: var(--accent); }
+        .badge {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.78em;
+            font-weight: 600;
+            margin-right: 0.3rem;
+        }
+        .badge-py { background: #306998; color: #ffd43b; }
+        .badge-cpp { background: #004482; color: #fff; }
+        .badge-js { background: #f7df1e; color: #000; }
+        .badge-proto { background: #6d28d9; color: #fff; }
+        .flow-diagram {
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: 'Cascadia Code', monospace;
+            font-size: 0.85em;
+            white-space: pre;
+            overflow-x: auto;
+            line-height: 1.4;
+            color: var(--accent);
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+        .tag { color: var(--accent3); font-weight: 600; }
+        .viva {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid #e94560;
+            border-radius: 10px;
+            padding: 1.2rem 1.4rem;
+            margin-bottom: 1rem;
+        }
+        .viva summary {
+            cursor: pointer;
+            color: #e94560;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+        .viva p { margin-top: 0.6rem; color: var(--text); }
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 2rem 0;
+        }
+        .file-ref {
+            color: var(--dim);
+            font-size: 0.85em;
+            font-style: italic;
+        }
+        @media print {
+            body { background: #fff; color: #000; padding: 1rem; }
+            .card, .toc, .viva { border-color: #ccc; background: #f9f9f9; }
+            pre, code { background: #f0f0f0; }
+            h1, h2, h3, h4, code, .tag { color: #333; }
+            .badge { border: 1px solid #999; }
+        }
+    </style>
+</head>
+<body>
+
+<h1>DogBot Recon System</h1>
+<p class="subtitle">Knowledge Transfer (KT) Document &mdash; Complete Technical Reference for Viva Voce Preparation</p>
+
+<!-- ============================================================ -->
+<!-- TABLE OF CONTENTS -->
+<!-- ============================================================ -->
+<nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+        <li><a href="#overview">Project Overview &amp; Objectives</a></li>
+        <li><a href="#tech-stack">Technology Stack &amp; Dependencies</a></li>
+        <li><a href="#architecture">System Architecture</a></li>
+        <li><a href="#data-flow">Data Flow Pipeline</a></li>
+        <li><a href="#how-it-works">How the System Actually Works (Step by Step)</a></li>
+        <li><a href="#esp32">ESP32-CAM Firmware (Embedded Layer)</a></li>
+        <li><a href="#backend">FastAPI Backend (Server Layer)</a></li>
+        <li><a href="#cv-pipeline">Computer Vision Pipeline</a></li>
+        <li><a href="#ml-detector">ML Object Detection (YOLOv8)</a></li>
+        <li><a href="#path-planner">Path Planning Engine (5-Stage Pipeline)</a></li>
+        <li><a href="#ai-decision">AI Decision Engine &amp; LLM Integration</a></li>
+        <li><a href="#mqtt">MQTT Remote Connectivity</a></li>
+        <li><a href="#websocket">WebSocket Communication</a></li>
+        <li><a href="#frontend">Frontend Dashboard</a></li>
+        <li><a href="#config">Configuration &amp; Environment</a></li>
+        <li><a href="#schemas">Data Models &amp; Schemas</a></li>
+        <li><a href="#concepts">Key CS/Robotics Concepts Used</a></li>
+        <li><a href="#run">How to Run the System</a></li>
+        <li><a href="#file-map">File Map &amp; Responsibilities</a></li>
+        <li><a href="#viva">Viva Voce Q&amp;A Bank</a></li>
+    </ol>
+</nav>
+
+<!-- ============================================================ -->
+<!-- 1. PROJECT OVERVIEW -->
+<!-- ============================================================ -->
+<h2 id="overview">1. Project Overview &amp; Objectives</h2>
+
+<div class="card info">
+    <h3>What is DogBot?</h3>
+    <p>Imagine a small robot car with a camera on top that can <strong>see</strong> its surroundings, <strong>understand</strong> what's in front of it (people, chairs, walls), <strong>decide</strong> which way to go, and <strong>drive itself</strong> without hitting anything &mdash; all while you watch the live video on your laptop browser. That's DogBot.</p>
+    <p>You can control it manually like a remote-control car, or switch it to autonomous mode where it drives itself using AI. It can even be controlled over the internet from a different city using cloud messaging.</p>
+</div>
+
+<div class="card highlight">
+    <p><strong>DogBot Recon System</strong> is an autonomous reconnaissance robot that combines:</p>
+    <ul>
+        <li><strong>ESP32-CAM</strong> microcontroller for live video streaming &amp; motor control</li>
+        <li><strong>Computer Vision</strong> (OpenCV) for real-time obstacle detection &amp; distance estimation</li>
+        <li><strong>Deep Learning</strong> (YOLOv8n-seg) for object detection &amp; instance segmentation</li>
+        <li><strong>Autonomous Path Planning</strong> (5-stage pipeline with Kalman filtering) for safe navigation</li>
+        <li><strong>AI-powered Decision Making</strong> via VIO Cloud LLM (Claude) as a fallback advisor</li>
+        <li><strong>MQTT over TLS</strong> for remote internet-based control</li>
+        <li><strong>Web Dashboard</strong> with real-time video, telemetry, and manual controls</li>
+    </ul>
+    <p>The robot can operate in <strong>MANUAL</strong> mode (human-controlled via dashboard) or <strong>SEMI_AUTO</strong> mode (AI-driven with human override capability).</p>
+</div>
+
+<h3>Project Goals</h3>
+<ol>
+    <li>Build a low-cost reconnaissance robot using commodity hardware (ESP32-CAM + L293D motor driver)</li>
+    <li>Implement multi-sensor fusion for reliable obstacle detection (CV + ML + optical flow)</li>
+    <li>Achieve real-time autonomous navigation with a 5-stage path planning pipeline (~2ms latency)</li>
+    <li>Enable remote operation over the internet via MQTT cloud broker</li>
+    <li>Provide a tactical web-based dashboard for monitoring and control</li>
+</ol>
+
+<!-- ============================================================ -->
+<!-- 2. TECH STACK -->
+<!-- ============================================================ -->
+<h2 id="tech-stack">2. Technology Stack &amp; Dependencies</h2>
+
+<div class="card info">
+    <h3>Why so many libraries?</h3>
+    <p>Building a robot that can see, think, and move requires many different skills. Just like a team of specialists (a cameraman, a navigator, a driver), each library handles one specific job:</p>
+    <ul>
+        <li><strong>FastAPI + Uvicorn</strong> &mdash; The "brain's office": receives requests, coordinates everything, serves the dashboard website</li>
+        <li><strong>OpenCV</strong> &mdash; The "eyes": processes camera images to find obstacles using traditional computer vision techniques</li>
+        <li><strong>Ultralytics (YOLOv8)</strong> &mdash; The "smart eyes": uses AI/deep learning to recognize specific objects (person, chair, dog)</li>
+        <li><strong>httpx</strong> &mdash; The "messenger": sends HTTP requests to the ESP32 and the cloud AI service</li>
+        <li><strong>aiomqtt</strong> &mdash; The "long-distance radio": enables remote control over the internet via MQTT messaging</li>
+        <li><strong>Pydantic</strong> &mdash; The "quality checker": validates all data flowing between components to prevent errors</li>
+        <li><strong>NumPy</strong> &mdash; The "calculator": fast mathematical operations on image arrays and grid data</li>
+    </ul>
+</div>
+
+<div class="grid-2">
+    <div class="card">
+        <h3>Backend (Python 3.10+)</h3>
+        <table>
+            <tr><th>Library</th><th>Version</th><th>Purpose</th></tr>
+            <tr><td><code>FastAPI</code></td><td>&ge;0.104</td><td>Async web framework, REST API, WebSocket</td></tr>
+            <tr><td><code>Uvicorn</code></td><td>&ge;0.24</td><td>ASGI server (HTTP + WS)</td></tr>
+            <tr><td><code>OpenCV</code></td><td>&ge;4.8</td><td>Computer vision processing</td></tr>
+            <tr><td><code>NumPy</code></td><td>&ge;1.24</td><td>Numerical operations, arrays</td></tr>
+            <tr><td><code>Ultralytics</code></td><td>&ge;8.0</td><td>YOLOv8 object detection &amp; segmentation</td></tr>
+            <tr><td><code>httpx</code></td><td>&ge;0.25</td><td>Async HTTP client (ESP32 + LLM API)</td></tr>
+            <tr><td><code>aiomqtt</code></td><td>&ge;2.0</td><td>Async MQTT client (remote control)</td></tr>
+            <tr><td><code>Pydantic</code></td><td>&ge;2.5</td><td>Data validation &amp; settings management</td></tr>
+            <tr><td><code>Pillow</code></td><td>&ge;10.0</td><td>Image manipulation utilities</td></tr>
+            <tr><td><code>websockets</code></td><td>&ge;12.0</td><td>WebSocket protocol support</td></tr>
+        </table>
+    </div>
+    <div class="card">
+        <h3>Firmware (C++ / Arduino)</h3>
+        <table>
+            <tr><th>Component</th><th>Details</th></tr>
+            <tr><td>Board</td><td>AI-Thinker ESP32-CAM (ESP32-S, OV2640)</td></tr>
+            <tr><td>Framework</td><td>Arduino ESP32 Core</td></tr>
+            <tr><td><code>esp_camera.h</code></td><td>Camera driver (JPEG capture)</td></tr>
+            <tr><td><code>WiFi.h</code></td><td>WiFi STA mode connectivity</td></tr>
+            <tr><td><code>WebServer.h</code></td><td>HTTP server (port 80)</td></tr>
+            <tr><td><code>PubSubClient.h</code></td><td>MQTT client library</td></tr>
+            <tr><td><code>WiFiClientSecure.h</code></td><td>TLS/SSL for MQTT</td></tr>
+            <tr><td>Motor Driver</td><td>L293D (4-channel) with ENA/ENB speed control</td></tr>
+        </table>
+        <h3 style="margin-top:1rem">Frontend</h3>
+        <table>
+            <tr><th>Tech</th><th>Purpose</th></tr>
+            <tr><td>Vanilla JS</td><td>WebSocket client, DOM manipulation</td></tr>
+            <tr><td>HTML5 + CSS3</td><td>Dashboard UI (no framework)</td></tr>
+            <tr><td>WebSocket API</td><td>Real-time video &amp; control</td></tr>
+        </table>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 3. SYSTEM ARCHITECTURE -->
+<!-- ============================================================ -->
+<h2 id="architecture">3. System Architecture</h2>
+
+<div class="card info">
+    <h3>What is the "Service Orchestration Pattern"?</h3>
+    <p>Think of a <strong>restaurant kitchen</strong>. There's a head chef (FrameManager) who coordinates all the station chefs: one handles the camera feed (ESP32Client), one analyzes the image (CVPipeline), one identifies objects using AI (MLDetector), one decides where to go (AIDecisionEngine), and one plans the exact route (PathPlannerEngine). Each "chef" does their job independently, but the head chef makes sure they work together in the right order and at the right time.</p>
+    <p><strong>Why this pattern?</strong> It keeps code organized &mdash; each service is in its own file, can be tested independently, and can be started/stopped without affecting others. If one service fails, the rest keep running.</p>
+</div>
+
+<div class="card">
+    <p>The system follows a <strong>Service Orchestration Pattern</strong> with clearly separated concerns:</p>
+    <div class="flow-diagram">
+┌──────────────────────────────────────────────────────────────────────┐
+│                        DogBot Recon System                          │
+├──────────────┬────────────────────────────┬─────────────────────────┤
+│  EMBEDDED    │      BACKEND (Python)      │     FRONTEND (Web)      │
+│  (ESP32-CAM) │                            │                         │
+│              │  ┌─────────────────────┐   │  ┌──────────────────┐   │
+│  ┌────────┐  │  │    FastAPI App      │   │  │  Dashboard       │   │
+│  │ Camera │──┼──│    (main.py)        │   │  │  (index.html)    │   │
+│  │ OV2640 │  │  │  ┌──────────────┐  │   │  │  ┌────────────┐  │   │
+│  └────────┘  │  │  │ FrameManager │  │◄──┼──│  │ Video WS   │  │   │
+│  ┌────────┐  │  │  │ (orchestrator│  │   │  │  │ Control WS │  │   │
+│  │ L293D  │◄─┼──│  └──────┬───────┘  │   │  │  └────────────┘  │   │
+│  │ Motors │  │  │     ┌───┴────┐     │   │  └──────────────────┘   │
+│  └────────┘  │  │  ┌──┴──┐ ┌──┴──┐  │   │                         │
+│  ┌────────┐  │  │  │ CV  │ │ ML  │  │   │                         │
+│  │  WiFi  │──┼──│  │Pipe │ │YOLO │  │   │                         │
+│  └────────┘  │  │  └──┬──┘ └──┬──┘  │   │                         │
+│  ┌────────┐  │  │  ┌──┴───────┴──┐  │   │                         │
+│  │  MQTT  │──┼──│  │ AI Decision │  │   │  ┌──────────────────┐   │
+│  │  TLS   │  │  │  │   Engine    │  │   │  │  MQTT Cloud      │   │
+│  └────────┘  │  │  │ ┌─────────┐ │  │   │  │  (HiveMQ)        │   │
+│              │  │  │ │ Path    │ │  │   │  └──────────────────┘   │
+│              │  │  │ │ Planner │ │  │   │                         │
+│              │  │  │ └─────────┘ │  │   │  ┌──────────────────┐   │
+│              │  │  │ ┌─────────┐ │  │   │  │  VIO Cloud LLM   │   │
+│              │  │  │ │ VIO LLM │ │──┼───│  │  (Claude API)    │   │
+│              │  │  │ └─────────┘ │  │   │  └──────────────────┘   │
+│              │  │  └─────────────┘  │   │                         │
+├──────────────┴──┴───────────────────┴───┴─────────────────────────┤
+│  Communication: MJPEG Stream | HTTP REST | WebSocket | MQTT/TLS   │
+└──────────────────────────────────────────────────────────────────────┘
+    </div>
+</div>
+
+<h3>Service Layer Summary</h3>
+<table>
+    <tr><th>Service</th><th>File</th><th>Responsibility</th></tr>
+    <tr><td><strong>ESP32Client</strong></td><td><code>services/esp32_client.py</code></td><td>MJPEG stream capture, motor commands (MQTT + HTTP), webcam fallback</td></tr>
+    <tr><td><strong>CVPipeline</strong></td><td><code>services/cv_pipeline.py</code></td><td>Multi-sensor fusion: background subtraction, edge detection, optical flow, distance estimation</td></tr>
+    <tr><td><strong>MLDetector</strong></td><td><code>services/ml_detector.py</code></td><td>YOLOv8n-seg inference with ByteTrack multi-object tracking</td></tr>
+    <tr><td><strong>AIDecisionEngine</strong></td><td><code>services/ai_decision.py</code></td><td>Navigation decisions, multi-frame voting, LLM fallback, pulse motor control</td></tr>
+    <tr><td><strong>PathPlannerEngine</strong></td><td><code>services/path_planner/engine.py</code></td><td>5-stage autonomous navigation pipeline (~2ms per frame)</td></tr>
+    <tr><td><strong>MQTTBridge</strong></td><td><code>services/mqtt_bridge.py</code></td><td>MQTT TLS connection to HiveMQ Cloud for remote control</td></tr>
+    <tr><td><strong>FrameManager</strong></td><td><code>services/frame_manager.py</code></td><td>Main orchestrator: coordinates all services, broadcasts results at 15 FPS</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- 4. DATA FLOW -->
+<!-- ============================================================ -->
+<h2 id="data-flow">4. Data Flow Pipeline</h2>
+
+<div class="card info">
+    <h3>What is a "Data Flow Pipeline"?</h3>
+    <p>A pipeline is like an <strong>assembly line in a factory</strong>. A raw camera image enters at one end, passes through multiple processing stations (each adding something), and comes out the other end as a fully analyzed frame with obstacle positions, navigation decisions, and motor commands. This happens <strong>15 times per second</strong> (15 FPS).</p>
+    <p>The diagram below shows exactly what happens to each frame as it flows through the system:</p>
+</div>
+
+<div class="card highlight">
+    <div class="flow-diagram">
+ESP32-CAM (MJPEG @ 30fps)
+    │
+    ▼
+ESP32Client.get_latest_frame()  ──── Fallback: Laptop Webcam (20fps)
+    │
+    ▼
+FrameManager._processing_loop()  ──── Target: 15 FPS
+    │
+    ├──► CVPipeline.process_frame(raw_frame)
+    │       │
+    │       ├── Background Subtraction (MOG2)
+    │       ├── Canny Edge Detection
+    │       ├── Sobel Gradient Magnitude
+    │       ├── Dense Optical Flow (Farneback)
+    │       ├── Perspective Distance Estimation
+    │       ├── Lane Classification (LEFT/CENTER/RIGHT)
+    │       ├── Multi-frame Obstacle Tracking (centroid-based)
+    │       ├── Thin Edge Map (poles, legs, wires)
+    │       └── Floor Color Model (adaptive HSV)
+    │       │
+    │       ▼
+    │       Returns: (annotated_frame, obstacles[], lane_status, edge_map, floor_mask)
+    │
+    ├──► MLDetector.detect(raw_frame)
+    │       │
+    │       ├── YOLOv8n-seg Inference (runs in thread executor)
+    │       ├── ByteTrack Multi-Object Tracking
+    │       ├── Instance Segmentation Masks
+    │       └── Zone Classification (DANGER/CAUTION/SAFE)
+    │       │
+    │       ▼
+    │       Returns: detections[] with masks, track_ids, bboxes
+    │
+    ├──► AIDecisionEngine.update_scene(obstacles, detections, lane_status)
+    │
+    ├──► PathPlannerEngine.plan(obstacles, detections, edge_map, floor_mask)
+    │       │
+    │       ├── Stage 1: Occupancy Grid (bird's-eye 60×80 cells, 5cm resolution)
+    │       ├── Stage 2: Kalman Filter State Estimation (position + velocity)
+    │       ├── Stage 3: Cost Map Generation (5 weighted components)
+    │       ├── Stage 4: Trajectory Evaluation (45 candidate arcs, DWA)
+    │       └── Stage 5: Temporal Smoothing (EMA)
+    │       │
+    │       ▼
+    │       Returns: PlannerOutput(steering, speed, trajectory_pixels, confidence)
+    │
+    ├──► Annotate frame with trajectory overlay + telemetry HUD
+    │
+    └──► Broadcast FrameResult to all WebSocket subscribers
+              │
+              ▼
+         Dashboard (Browser) ──── Updates video, telemetry, detection log
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 4.5 HOW THE SYSTEM ACTUALLY WORKS -->
+<!-- ============================================================ -->
+<h2 id="how-it-works">How the System Actually Works (Step by Step)</h2>
+
+<div class="card highlight">
+    <h3>Step 1: You Start the Server</h3>
+    <p>You type <code>python run.py</code> on your laptop. Here's what happens behind the scenes:</p>
+    <ol>
+        <li>On Windows, a special event loop (<code>SelectorEventLoop</code>) is created for MQTT compatibility</li>
+        <li>FastAPI server starts on <code>http://localhost:8000</code></li>
+        <li>The <strong>lifespan manager</strong> kicks in and starts all services in order:
+            <ul>
+                <li><strong>MQTTBridge</strong> connects to HiveMQ Cloud broker (for remote control)</li>
+                <li><strong>ESP32Client</strong> starts reading the video stream from ESP32-CAM (or falls back to your laptop webcam)</li>
+                <li><strong>MLDetector</strong> loads the YOLOv8 AI model into memory (~6.7 MB)</li>
+                <li><strong>AIDecisionEngine</strong> initializes the path planner and decision logic</li>
+                <li><strong>FrameManager</strong> starts the main processing loop at 15 FPS</li>
+            </ul>
+        </li>
+    </ol>
+
+    <h3>Step 2: Video Frames Are Captured</h3>
+    <p>The ESP32-CAM continuously captures JPEG photos at ~30 FPS and sends them over WiFi as an MJPEG stream. The <strong>ESP32Client</strong> on your laptop receives these frames by reading the HTTP stream and decoding each JPEG image. If the ESP32 is unreachable (powered off, different network), it automatically switches to your laptop's built-in webcam.</p>
+
+    <h3>Step 3: Each Frame Is Processed (15 times per second)</h3>
+    <p>The <strong>FrameManager</strong> grabs the latest frame and sends it through the processing pipeline:</p>
+    <ol>
+        <li><strong>CVPipeline</strong> analyzes the frame using 4 methods (background subtraction, edges, gradients, optical flow) to find obstacles, estimate their distances, and classify lanes as clear/caution/blocked</li>
+        <li><strong>MLDetector</strong> runs YOLOv8 on the frame to identify specific objects (person, chair, etc.) with segmentation masks and tracking IDs</li>
+        <li><strong>AIDecisionEngine</strong> receives all the obstacle and detection data, runs the path planner, and decides: FORWARD, LEFT, RIGHT, or STOP</li>
+        <li>The frame is annotated with colorful overlays showing obstacles, trajectories, telemetry, and the chosen path</li>
+    </ol>
+
+    <h3>Step 4: Path Planner Finds the Best Route (~2ms)</h3>
+    <p>Inside the AIDecisionEngine, the <strong>5-stage path planner</strong> runs:</p>
+    <ol>
+        <li>Build a bird's-eye-view <strong>occupancy grid</strong> (60&times;80 cells) from all detected obstacles</li>
+        <li>Smooth obstacle positions using <strong>Kalman filters</strong> and predict where they'll be in the future</li>
+        <li>Generate a <strong>cost map</strong> (red = dangerous, green = safe)</li>
+        <li>Evaluate <strong>45 possible curved paths</strong> and score each one for safety, progress, and smoothness</li>
+        <li>Pick the best path and smooth the steering to prevent jerky movement</li>
+    </ol>
+
+    <h3>Step 5: Motor Commands Are Sent</h3>
+    <p>The decided direction is sent to the ESP32's motors:</p>
+    <ul>
+        <li><strong>If MQTT is connected:</strong> Published to the <code>dogbot/cmd/motor</code> topic &rarr; ESP32 receives it instantly via cloud broker</li>
+        <li><strong>If MQTT is down:</strong> Falls back to direct HTTP request to the ESP32's IP address (local network only)</li>
+    </ul>
+    <p>The robot uses <strong>pulse-based control</strong>: move for 500ms &rarr; stop &rarr; analyze new frame &rarr; decide again. This prevents the robot from driving "blind" between decisions.</p>
+
+    <h3>Step 6: Dashboard Shows Everything Live</h3>
+    <p>Open <code>http://localhost:8000</code> in your browser. Two WebSocket connections are established:</p>
+    <ul>
+        <li><strong>Video WebSocket</strong> receives 15 annotated frames per second &mdash; you see the live feed with colored obstacles, trajectory paths, and zone indicators</li>
+        <li><strong>Control WebSocket</strong> lets you send manual motor commands (buttons/keyboard) and receives AI decisions, detection alerts, and telemetry</li>
+    </ul>
+    <p>You can switch between <strong>MANUAL</strong> mode (you drive) and <strong>SEMI_AUTO</strong> mode (AI drives, you can override anytime).</p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 5. ESP32 FIRMWARE -->
+<!-- ============================================================ -->
+<h2 id="esp32">5. ESP32-CAM Firmware (Embedded Layer)</h2>
+<p class="file-ref">File: firmware/esp32cam_dogbot/esp32cam_dogbot.ino</p>
+
+<div class="card info">
+    <h3>What is ESP32-CAM?</h3>
+    <p>The <strong>ESP32-CAM</strong> is a tiny, low-cost microcontroller board (about the size of a matchbox) that has a <strong>camera</strong>, <strong>WiFi</strong>, and a <strong>processor</strong> all built into one chip. Think of it as a very basic smartphone without a screen &mdash; it can take pictures, connect to WiFi, and run simple programs.</p>
+    <p><strong>Where is it used?</strong> It's the robot's physical hardware &mdash; mounted on the robot car. It captures live video and sends it to the Python backend over WiFi. It also receives motor commands and controls the wheels.</p>
+    <p><strong>Why ESP32-CAM?</strong></p>
+    <ul>
+        <li><strong>Cheap</strong> &mdash; Costs around $5-10, making it ideal for a low-cost robot</li>
+        <li><strong>All-in-one</strong> &mdash; Camera + WiFi + processor in one board, no extra modules needed</li>
+        <li><strong>Arduino-compatible</strong> &mdash; Easy to program using the Arduino IDE (beginner-friendly)</li>
+        <li><strong>Dual-core</strong> &mdash; Can run camera streaming and motor control simultaneously without lag</li>
+    </ul>
+
+    <h3>What is Firmware?</h3>
+    <p>Firmware is the software that runs directly on the hardware (ESP32 chip). Unlike Python code that runs on your laptop, firmware is written in C++ and uploaded (flashed) directly onto the microcontroller. Once uploaded, it runs automatically whenever the ESP32 is powered on &mdash; no computer needed.</p>
+
+    <h3>What is MJPEG Streaming?</h3>
+    <p>MJPEG stands for <strong>Motion JPEG</strong>. It's the simplest way to stream video: the camera takes a JPEG photo, sends it, takes another photo, sends it, and so on &mdash; like a <strong>flipbook animation</strong>. Each "page" is a separate JPEG image. At 30 photos per second, it looks like smooth video. It's not as efficient as modern video codecs (like H.264), but it's much simpler to implement on a microcontroller.</p>
+
+    <h3>What is FreeRTOS?</h3>
+    <p><strong>FreeRTOS</strong> is a mini operating system for microcontrollers (like a very lightweight version of Windows/Linux). It lets the ESP32 run multiple tasks at the same time. In our case, one task handles the camera stream (on CPU Core 0), and another handles motor commands and MQTT (on CPU Core 1). Without FreeRTOS, the ESP32 could only do one thing at a time.</p>
+</div>
+
+<div class="card">
+    <h3>Hardware Configuration</h3>
+    <table>
+        <tr><th>Component</th><th>Pin(s)</th><th>Details</th></tr>
+        <tr><td>Camera (OV2640)</td><td>D0-D7, XCLK, PCLK, VSYNC, HREF, SDA, SCL</td><td>VGA 640&times;480 JPEG, PSRAM double-buffered</td></tr>
+        <tr><td>Motor A (Left)</td><td>IN1=GPIO12, IN2=GPIO13, ENA=GPIO2</td><td>L293D direction + PWM speed</td></tr>
+        <tr><td>Motor B (Right)</td><td>IN3=GPIO14, IN4=GPIO15, ENB=GPIO4</td><td>L293D direction + PWM speed</td></tr>
+        <tr><td>WiFi</td><td>Internal</td><td>STA mode, connects to configured AP</td></tr>
+    </table>
+</div>
+
+<div class="card">
+    <h3>Dual-Server Design</h3>
+    <ul>
+        <li><strong>Port 80</strong> &mdash; HTTP Control Server (<code>WebServer</code>)
+            <ul>
+                <li><code>GET /</code> &mdash; Status page</li>
+                <li><code>GET /motor?dir=forward&amp;speed=200</code> &mdash; Motor command</li>
+                <li><code>GET /status</code> &mdash; JSON status (RSSI, uptime, motor state, speed)</li>
+            </ul>
+        </li>
+        <li><strong>Port 81</strong> &mdash; MJPEG Streaming Server (<code>WiFiServer</code>)
+            <ul>
+                <li>Runs on Core 0 via <code>xTaskCreatePinnedToCore()</code> (FreeRTOS)</li>
+                <li>Sends multipart JPEG frames at ~30 FPS</li>
+                <li>Content-Type: <code>multipart/x-mixed-replace; boundary=frame</code></li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<div class="card">
+    <h3>Motor Control (L293D + PWM)</h3>
+    <ul>
+        <li><strong>PWM via LEDC:</strong> 1 kHz frequency, 8-bit resolution (0-255 speed range)</li>
+        <li><strong>Tank steering:</strong> Left turn = Motor A backward + Motor B forward; Right turn = reverse</li>
+        <li><strong>Motor trim:</strong> <code>MOTOR_TRIM = 15</code> compensates hardware drift (reduces right motor speed by 15)</li>
+        <li><strong>Lazy PWM initialization:</strong> PWM channels configured on first motor use to avoid ESP32 WiFi conflicts</li>
+        <li><strong>Safety failsafe:</strong> Auto-stop after 800ms of no commands</li>
+    </ul>
+    <pre><code>// Forward with drift compensation:
+motorA(true, speed);                               // Left motor at full speed
+motorB(true, constrain(speed - MOTOR_TRIM, 0, 255)); // Right motor reduced</code></pre>
+</div>
+
+<div class="card">
+    <h3>MQTT Integration (ESP32 Side)</h3>
+    <ul>
+        <li>Uses <code>WiFiClientSecure</code> + <code>PubSubClient</code> for TLS MQTT</li>
+        <li><strong>Subscribes to:</strong> <code>dogbot/cmd/motor</code> &mdash; receives JSON <code>{"dir":"forward","speed":200}</code></li>
+        <li><strong>Publishes to:</strong> <code>dogbot/status</code> (every 5s) and <code>dogbot/heartbeat</code> (every 3s)</li>
+        <li>Auto-reconnect every 5 seconds on disconnect</li>
+        <li>Certificate validation skipped with <code>setInsecure()</code> (development mode)</li>
+    </ul>
+</div>
+
+<!-- ============================================================ -->
+<!-- 6. FASTAPI BACKEND -->
+<!-- ============================================================ -->
+<h2 id="backend">6. FastAPI Backend (Server Layer)</h2>
+<p class="file-ref">Files: backend/main.py, backend/config.py</p>
+
+<div class="card info">
+    <h3>What is an API?</h3>
+    <p>An <strong>API (Application Programming Interface)</strong> is a set of rules that allows different software programs to talk to each other. Think of it like a <strong>menu in a restaurant</strong> &mdash; you (the client/browser) look at the menu (API), place an order (send a request), and the kitchen (server) prepares your food (processes the request) and delivers it back to you (sends a response).</p>
+    <p>For example, when the dashboard wants the robot's current status, it sends a request to <code>GET /api/health</code>, and the backend responds with health data in JSON format.</p>
+
+    <h3>What is FastAPI?</h3>
+    <p><strong>FastAPI</strong> is a modern Python web framework for building APIs. It's called "Fast" for two reasons:</p>
+    <ul>
+        <li><strong>Fast to run</strong> &mdash; It uses asynchronous programming (async/await), so it can handle many requests at the same time without getting stuck waiting</li>
+        <li><strong>Fast to code</strong> &mdash; It automatically generates API documentation, validates data types, and has clean syntax</li>
+    </ul>
+    <p><strong>Why FastAPI over Flask or Django?</strong></p>
+    <ul>
+        <li><strong>Native async/await support</strong> &mdash; Flask and Django are synchronous by default, meaning they handle one request at a time. FastAPI handles many simultaneously, which is critical for our robot (video stream + motor commands + MQTT + WebSocket all happening at once)</li>
+        <li><strong>Built-in WebSocket support</strong> &mdash; We need real-time video streaming; FastAPI supports WebSocket natively</li>
+        <li><strong>Pydantic integration</strong> &mdash; Automatic data validation (if the dashboard sends an invalid motor command, FastAPI catches it before it reaches the robot)</li>
+        <li><strong>Automatic API docs</strong> &mdash; Visit <code>/docs</code> to see an interactive Swagger UI for testing all endpoints</li>
+    </ul>
+
+    <h3>What is Async/Await?</h3>
+    <p>Normally, code runs <strong>one line at a time</strong> and waits for each operation to finish before moving to the next. This is called <strong>synchronous</strong> execution. But what if you're waiting for the ESP32 to send a video frame (takes 30ms) &mdash; should everything else freeze?</p>
+    <p><strong>Async/await</strong> solves this. It lets your code say "start this task, and while waiting for the result, go do something else." It's like a <strong>chef in a kitchen</strong>: instead of staring at the rice cooker until it's done, the chef starts chopping vegetables. When the rice is ready, the chef comes back to it.</p>
+    <p>In our system, async enables: reading the video stream, handling WebSocket clients, running MQTT, and making LLM API calls &mdash; all concurrently in a single thread without blocking each other.</p>
+    <pre><code># Synchronous (SLOW - everything waits):
+frame = get_frame()         # Wait 30ms... doing nothing
+obstacles = detect(frame)   # Wait 50ms... doing nothing
+send_to_dashboard(frame)    # Wait 10ms... doing nothing
+
+# Asynchronous (FAST - work while waiting):
+frame = await get_frame()         # While waiting, handle other WebSocket clients
+obstacles = await detect(frame)   # While waiting, process MQTT messages
+await send_to_dashboard(frame)    # While waiting, read next frame</code></pre>
+
+    <h3>What is a Lifespan Manager?</h3>
+    <p>A lifespan manager is code that runs when the server <strong>starts up</strong> and <strong>shuts down</strong>. Think of it like opening and closing a restaurant:</p>
+    <ul>
+        <li><strong>Opening (startup):</strong> Turn on lights, heat up ovens, prep ingredients &rarr; Start MQTT connection, connect to camera, load AI model</li>
+        <li><strong>Closing (shutdown):</strong> Turn off ovens, clean up, lock doors &rarr; Stop all services, close connections, free resources</li>
+    </ul>
+    <p>Services must start in the right order (can't process video before the camera is connected) and stop in reverse order (can't close the camera before the video processor stops using it).</p>
+</div>
+
+<div class="card">
+    <h3>Application Lifecycle (Lifespan Pattern)</h3>
+    <p>FastAPI uses <code>@asynccontextmanager</code> for startup/shutdown lifecycle:</p>
+    <pre><code>@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # STARTUP: Wire services → Start in dependency order
+    await mqtt_bridge.start()    # 1. MQTT connection
+    await esp32.start()          # 2. Video stream capture
+    await ml_detector.start()    # 3. Load YOLOv8 model
+    await ai_engine.start()      # 4. AI decision loop
+    await frame_mgr.start()      # 5. Main processing loop
+
+    yield  # App is running
+
+    # SHUTDOWN: Stop in reverse order
+    await frame_mgr.stop()
+    await ai_engine.stop()
+    await esp32.stop()
+    await mqtt_bridge.stop()</code></pre>
+
+    <h4>Asyncio Service Lifecycle Pattern (used by ALL services):</h4>
+    <pre><code>async def start(self):
+    self._running = True
+    self._task = asyncio.create_task(self._loop())
+
+async def stop(self):
+    self._running = False
+    if self._task:
+        self._task.cancel()
+        try: await self._task
+        except asyncio.CancelledError: pass</code></pre>
+</div>
+
+<div class="card">
+    <h3>Routers</h3>
+    <table>
+        <tr><th>Router</th><th>File</th><th>Endpoints</th></tr>
+        <tr><td>Video WS</td><td><code>routers/video_ws.py</code></td><td><code>ws://host/ws/video</code> &mdash; Broadcasts FrameResult JSON (video + telemetry)</td></tr>
+        <tr><td>Control WS</td><td><code>routers/control_ws.py</code></td><td><code>ws://host/ws/control</code> &mdash; Bidirectional: motor commands, mode switching, AI decisions</td></tr>
+        <tr><td>REST API</td><td><code>routers/api.py</code></td><td><code>GET /api/health</code>, <code>GET /api/telemetry</code>, <code>POST /api/mode</code>, <code>GET /api/decisions</code>, <code>GET /api/detections</code></td></tr>
+        <tr><td>Static</td><td><code>main.py</code></td><td><code>GET /</code> (dashboard), <code>GET /pin-diagram</code>, <code>GET /setup-guide</code></td></tr>
+    </table>
+</div>
+
+<div class="card warn">
+    <h3>Windows Event Loop Fix (Critical)</h3>
+    <p><code>run.py</code> solves a Windows-specific issue where the default <code>ProactorEventLoop</code> doesn't support <code>add_reader()/add_writer()</code> needed by aiomqtt/paho-mqtt:</p>
+    <pre><code># run.py — Windows MQTT fix
+if sys.platform == 'win32':
+    loop = asyncio.SelectorEventLoop()  # Supports add_reader/add_writer
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(main())      # Run uvicorn.Server in this loop
+else:
+    asyncio.run(main())                  # Linux/Mac — default works fine</code></pre>
+    <p><strong>Why:</strong> <code>uvicorn.run()</code> creates its own event loop, but we need to control which loop type is used. By creating a <code>SelectorEventLoop</code> explicitly and using <code>uvicorn.Server</code> (not <code>uvicorn.run</code>), all async code runs in the correct loop.</p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 7. CV PIPELINE -->
+<!-- ============================================================ -->
+<h2 id="cv-pipeline">7. Computer Vision Pipeline</h2>
+<p class="file-ref">File: backend/services/cv_pipeline.py (~1100 lines)</p>
+
+<div class="card info">
+    <h3>What is Computer Vision?</h3>
+    <p><strong>Computer Vision (CV)</strong> is the field of teaching computers to "see" and understand images. When you look at a photo, your brain instantly recognizes objects, estimates distances, and detects motion. Computer Vision tries to do the same thing using algorithms and math.</p>
+
+    <h3>What is OpenCV?</h3>
+    <p><strong>OpenCV</strong> (Open Source Computer Vision Library) is the world's most popular computer vision library with 2,500+ algorithms. It provides ready-made functions for image processing &mdash; blurring, edge detection, object tracking, etc. Instead of writing complex image processing math from scratch, we call OpenCV functions. It's free, fast (written in C++ with Python bindings), and used by companies like Google, Tesla, and NASA.</p>
+
+    <h3>Why use multiple detection methods?</h3>
+    <p>No single detection method is perfect. Background subtraction fails if the robot is moving. Edge detection can be confused by textures. Optical flow only sees moving objects. By combining <strong>4 different methods</strong>, we get reliable detection even when individual methods fail. This is called <strong>multi-sensor fusion</strong> &mdash; like having 4 people watching for obstacles, each looking for different things. If 3 out of 4 agree something is there, it probably is.</p>
+    <p><strong>Advantages of this approach:</strong></p>
+    <ul>
+        <li>More reliable than any single method alone</li>
+        <li>No AI model needed &mdash; runs on pure math/algorithms (fast, no GPU required)</li>
+        <li>Works in real-time on every frame (not frame-skipped like ML detection)</li>
+        <li>Detects both static and moving obstacles</li>
+    </ul>
+</div>
+
+<div class="card highlight">
+    <h3>Multi-Sensor Fusion Approach</h3>
+    <p>The CV pipeline combines <strong>4 detection methods</strong> for robust obstacle detection:</p>
+
+    <h4>1. Background Subtraction (MOG2)</h4>
+    <p><strong>In simple terms:</strong> The camera watches the scene for a while and learns what the "background" looks like (walls, floor, furniture). Anything new that appears (a person walking in) is detected as "foreground" &mdash; a potential obstacle.</p>
+    <ul>
+        <li>Algorithm: <code>cv2.createBackgroundSubtractorMOG2(history=300, varThreshold=40)</code></li>
+        <li>Learns a statistical model of the background over 300 frames</li>
+        <li>Detects foreground objects as deviations from the learned background</li>
+        <li>Shadow detection enabled for handling partial occlusions</li>
+    </ul>
+    <p><strong>Advantage:</strong> Great at detecting ANY new object in the scene, regardless of shape or color. <strong>Limitation:</strong> Needs the camera to be stationary; struggles when the robot itself is moving (everything shifts).</p>
+
+    <h4>2. Canny Edge Detection</h4>
+    <p><strong>In simple terms:</strong> Finds the sharp boundaries (edges) of objects in the image. Where the color changes suddenly (e.g., a dark chair against a light floor), Canny draws a line. These edge lines reveal obstacle shapes.</p>
+    <ul>
+        <li>Parameters: <code>low=50, high=150</code> (configurable via .env)</li>
+        <li>Pre-processing: Gaussian blur with kernel size 5</li>
+        <li>Detects object boundaries for contour-based obstacle identification</li>
+    </ul>
+    <p><strong>Advantage:</strong> Works even when the robot is moving, doesn't need a "learned" background. Simple and very fast.</p>
+
+    <h4>3. Sobel Gradient Magnitude</h4>
+    <p><strong>In simple terms:</strong> Similar to Canny but measures the <em>strength</em> of edges rather than just detecting them. It calculates how quickly the image brightness changes in each direction (horizontal and vertical), which helps find solid object boundaries.</p>
+    <ul>
+        <li>Computes <code>grad_x</code> and <code>grad_y</code> using Sobel operators (ksize=3)</li>
+        <li>Magnitude: <code>&radic;(grad_x&sup2; + grad_y&sup2;)</code></li>
+        <li>Threshold at 30 for binary mask &mdash; texture-agnostic edge detection</li>
+        <li>Also used for thin-edge map: filters for vertical structures (poles, legs, wires)</li>
+    </ul>
+    <p><strong>Advantage:</strong> Specifically good at detecting thin vertical structures like table legs, poles, and wires that other methods might miss.</p>
+
+    <h4>4. Dense Optical Flow (Farneback)</h4>
+    <p><strong>In simple terms:</strong> Compares two consecutive frames and calculates how each pixel has moved. If a group of pixels is moving together (like a person walking), that's a moving obstacle. It's like spotting someone in a crowd by noticing they're the one moving.</p>
+    <ul>
+        <li>Algorithm: <code>cv2.calcOpticalFlowFarneback()</code></li>
+        <li>Parameters: pyr_scale=0.5, levels=3, winsize=15, iterations=3</li>
+        <li>Detects moving obstacles by computing pixel motion between consecutive frames</li>
+        <li>Flow threshold: 2.0 pixels/frame for motion significance</li>
+        <li>Computed every 2 frames for performance</li>
+    </ul>
+    <p><strong>Advantage:</strong> The ONLY method that detects <em>motion</em>. A person walking toward the robot is a bigger threat than a stationary chair, and optical flow catches this.</p>
+</div>
+
+<div class="card">
+    <h3>Perspective-Based Distance Estimation</h3>
+    <p>Uses inverse perspective mapping to estimate real-world distance from pixel position:</p>
+    <pre><code>distance_m = DIST_SCALE / (pixel_y - vanishing_point_y)
+# DIST_SCALE = 80.0 (calibration constant)
+# vanishing_point_y = 0.30 × frame_height = 144 pixels (for 480p)</code></pre>
+
+    <h4>Calibration Constants:</h4>
+    <table>
+        <tr><th>Constant</th><th>Value</th><th>Meaning</th></tr>
+        <tr><td><code>CAM_HEIGHT_M</code></td><td>0.15</td><td>Camera height above ground (15 cm)</td></tr>
+        <tr><td><code>VANISH_Y_FRAC</code></td><td>0.30</td><td>Vanishing point at 30% of frame height</td></tr>
+        <tr><td><code>DIST_SCALE</code></td><td>80.0</td><td>Perspective scaling factor</td></tr>
+        <tr><td><code>ZONE_NEAR_M</code></td><td>0.5</td><td>DANGER zone boundary (0-0.5m)</td></tr>
+        <tr><td><code>ZONE_MID_M</code></td><td>1.2</td><td>CAUTION zone boundary (0.5-1.2m)</td></tr>
+    </table>
+
+    <h4>Vanishing Point Auto-Detection:</h4>
+    <p>Every 30 frames, the system uses <strong>Probabilistic Hough Transform</strong> to find line intersections and estimate the vanishing point for improved perspective calibration.</p>
+</div>
+
+<div class="card">
+    <h3>Lane Classification &amp; Free-Path Analysis</h3>
+    <ul>
+        <li>Frame divided into 3 lanes: <strong>LEFT</strong> (0-33%), <strong>CENTER</strong> (33-67%), <strong>RIGHT</strong> (67-100%)</li>
+        <li>Each lane classified as: <code>clear</code>, <code>caution</code>, or <code>blocked</code></li>
+        <li>Free path recommendation: safest lane for navigation</li>
+        <li>Nearest obstacle distance tracked per lane</li>
+    </ul>
+
+    <h3>Centroid-Based Multi-Object Tracking</h3>
+    <ul>
+        <li>Hungarian-style greedy matching: sorted by Euclidean distance between centroids</li>
+        <li>Max association distance: 80 pixels</li>
+        <li>Track age management: tracks die after 8 frames without match</li>
+        <li>Velocity estimation: computed from previous centroid position</li>
+        <li>Time-to-Collision (TTC) calculated from closing speed</li>
+    </ul>
+
+    <h3>Auxiliary Maps for Path Planner</h3>
+    <ul>
+        <li><strong>Thin Edge Map:</strong> Detects thin vertical structures (desk legs, poles, wires) that standard contour detection misses</li>
+        <li><strong>Floor Color Model:</strong> Adaptive HSV model using Exponential Moving Average (EMA, &alpha;=0.05) to learn the floor color and flag non-floor regions as potential obstacles</li>
+    </ul>
+</div>
+
+<!-- ============================================================ -->
+<!-- 8. ML DETECTOR -->
+<!-- ============================================================ -->
+<h2 id="ml-detector">8. ML Object Detection (YOLOv8)</h2>
+<p class="file-ref">File: backend/services/ml_detector.py</p>
+
+<div class="card info">
+    <h3>What is Object Detection?</h3>
+    <p>Object detection is an AI task where a computer looks at an image and identifies <strong>what</strong> objects are in it and <strong>where</strong> they are. For example: "There is a <em>person</em> at coordinates (100, 200) and a <em>chair</em> at coordinates (400, 300)." This is done by a trained neural network (deep learning model) that has "seen" millions of images during training.</p>
+
+    <h3>What is YOLO?</h3>
+    <p><strong>YOLO (You Only Look Once)</strong> is a family of object detection models. Unlike older methods that scan an image multiple times in small regions, YOLO processes the <strong>entire image in one pass</strong> (one "look"), making it extremely fast. YOLOv8 is the latest version from Ultralytics with improved accuracy and speed.</p>
+
+    <h3>What is Instance Segmentation?</h3>
+    <p>Regular object detection draws a <strong>rectangle (bounding box)</strong> around each object. Instance segmentation goes further &mdash; it identifies the <strong>exact pixel-level outline</strong> of each object. This gives us the precise shape of obstacles (not just a box) for more accurate path planning.</p>
+    <p>Example: A bounding box around a person includes empty space on both sides. A segmentation mask traces exactly around the person's body, so the path planner knows exactly where the obstacle really is.</p>
+
+    <h3>Why YOLOv8n-seg (Nano Segmentation)?</h3>
+    <ul>
+        <li><strong>Nano</strong> = smallest and fastest variant (~6.7 MB). It runs on CPU without a GPU, which is important for a laptop-based robot controller</li>
+        <li><strong>Segmentation</strong> = pixel-level masks give more precise obstacle shapes than bounding boxes</li>
+        <li><strong>80 classes</strong> = pre-trained on COCO dataset, recognizes person, chair, bottle, dog, car, etc. &mdash; no custom training needed</li>
+        <li><strong>Built-in tracking</strong> = ByteTrack tracker maintains persistent IDs across frames (person #1 stays #1 even if they move)</li>
+    </ul>
+    <p><strong>Advantage over CV Pipeline:</strong> The CV pipeline detects "something is there" but doesn't know <em>what</em> it is. YOLOv8 tells you it's a "person" with 85% confidence. This enables smarter decisions (e.g., slow down for a person, ignore a shadow).</p>
+</div>
+
+<div class="card">
+    <h3>Model: YOLOv8n-seg (Nano Segmentation)</h3>
+    <ul>
+        <li><strong>Architecture:</strong> YOLOv8 Nano variant with instance segmentation head</li>
+        <li><strong>Model file:</strong> <code>yolov8n-seg.pt</code> (~6.7 MB) — auto-downloads on first run</li>
+        <li><strong>Inference:</strong> Runs in <code>asyncio.run_in_executor()</code> to avoid blocking the event loop</li>
+        <li><strong>Tracking:</strong> Built-in ByteTrack tracker (<code>bytetrack.yaml</code>) for multi-object tracking across frames</li>
+        <li><strong>Confidence threshold:</strong> 0.35 (configurable)</li>
+        <li><strong>Frame skipping:</strong> Runs every N frames (default: 1, configurable via <code>ml_detect_every_n_frames</code>)</li>
+    </ul>
+
+    <h4>Detection Pipeline:</h4>
+    <pre><code># YOLOv8 inference with tracking (runs in thread pool)
+results = self._model.track(
+    frame,
+    persist=True,             # Maintain track IDs across frames
+    conf=0.35,                # Confidence threshold
+    verbose=False,
+    tracker="bytetrack.yaml", # ByteTrack multi-object tracker
+    retina_masks=False         # Faster mask generation
+)</code></pre>
+
+    <h4>Output per detection:</h4>
+    <ul>
+        <li><strong>Bounding box:</strong> (x, y, w, h)</li>
+        <li><strong>Class name:</strong> from COCO dataset (person, chair, bottle, etc.)</li>
+        <li><strong>Confidence score:</strong> 0.0 to 1.0</li>
+        <li><strong>Track ID:</strong> Persistent ID from ByteTrack</li>
+        <li><strong>Segmentation mask:</strong> Polygon points for instance boundary</li>
+        <li><strong>Zone:</strong> DANGER / CAUTION / SAFE (based on vertical position)</li>
+    </ul>
+
+    <h4>Visualization:</h4>
+    <p>Semi-transparent colored overlays on segmentation masks (red=DANGER, yellow=CAUTION, green=SAFE) with track ID labels.</p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 9. PATH PLANNER -->
+<!-- ============================================================ -->
+<h2 id="path-planner">9. Path Planning Engine (5-Stage Pipeline)</h2>
+<p class="file-ref">Files: backend/services/path_planner/ (engine.py, occupancy_grid.py, obstacle_estimator.py, cost_map.py, trajectory_evaluator.py, schemas.py)</p>
+
+<div class="card info">
+    <h3>What is Path Planning?</h3>
+    <p>Path planning is how the robot decides <strong>which way to go</strong> to reach its goal without hitting anything. Imagine you're walking through a crowded room &mdash; your brain constantly looks at obstacles around you, predicts where moving people are heading, evaluates multiple possible paths, and picks the safest one. The path planner does exactly this, but using math and algorithms, <strong>15 times per second</strong>.</p>
+
+    <h3>What is a Kalman Filter? (Detailed Explanation)</h3>
+    <p>The Kalman filter is one of the most important algorithms in robotics. Here's a simple way to understand it:</p>
+    <p><strong>The Problem:</strong> Our camera detects an obstacle at position X. But camera measurements are <strong>noisy</strong> (imprecise) &mdash; the detected position jumps around slightly each frame. If the path planner reacts to these noisy measurements directly, the robot would zigzag erratically.</p>
+    <p><strong>The Solution:</strong> The Kalman filter combines two sources of information:</p>
+    <ol>
+        <li><strong>Prediction (what we EXPECT):</strong> "The obstacle was at position 2.0m last frame, moving at 0.5 m/s. So this frame, it should be at approximately 2.0 + 0.5 &times; 0.066 = 2.033m."</li>
+        <li><strong>Measurement (what we SEE):</strong> "The camera says the obstacle is at 2.05m."</li>
+    </ol>
+    <p>The filter <strong>blends</strong> these two: prediction says 2.033m, measurement says 2.05m. The filter calculates a weighted average based on how much it trusts each source (using the <strong>Kalman Gain</strong>). If measurements have been accurate recently, it trusts the measurement more. If measurements are noisy, it trusts the prediction more.</p>
+    <p><strong>Real-world analogy:</strong> Imagine tracking a friend's location using GPS (noisy, jumps around) AND your knowledge of where they were walking (they were heading north at walking speed). The Kalman filter combines both to give you a smooth, accurate estimate of their actual position.</p>
+    <p><strong>Two Steps Every Frame:</strong></p>
+    <ul>
+        <li><strong>PREDICT:</strong> Use the motion model to estimate where the obstacle is NOW (before looking at the camera)</li>
+        <li><strong>UPDATE:</strong> Look at the camera measurement, compute Kalman Gain, and correct the prediction</li>
+    </ul>
+    <p><strong>Why it's powerful in our system:</strong></p>
+    <ul>
+        <li>Smooths noisy position measurements &rarr; robot doesn't zigzag</li>
+        <li>Estimates obstacle <strong>velocity</strong> (speed and direction of movement)</li>
+        <li>Predicts <strong>future positions</strong> &mdash; "this person will be HERE in 0.5 seconds" &rarr; robot can avoid the predicted position proactively</li>
+    </ul>
+
+    <h3>What is an Occupancy Grid?</h3>
+    <p>Imagine looking at the room from <strong>above</strong> (bird's-eye view) and dividing the floor into a grid of small squares (5cm &times; 5cm each). Each square is colored: <strong>white</strong> = free space, <strong>black</strong> = obstacle. This grid is the occupancy grid &mdash; a simple 2D map of what's around the robot. The path planner uses this map to find clear paths.</p>
+    <p><strong>Our grid:</strong> 60 columns &times; 80 rows = 3 meters wide &times; 4 meters deep, with 5cm resolution.</p>
+
+    <h3>What is DWA (Dynamic Window Approach)?</h3>
+    <p>DWA is a path planning method that works by <strong>trying many possible paths and picking the best one</strong>. Think of it like choosing a lane on a highway:</p>
+    <ol>
+        <li>Generate 45 possible curved paths (different steering angles &times; different speeds)</li>
+        <li>For each path, check: "Will I hit something? How close will I get to obstacles? Am I going forward?"</li>
+        <li>Score each path using multiple criteria (safety, progress, smoothness)</li>
+        <li>Pick the path with the best score</li>
+    </ol>
+    <p><strong>Advantage:</strong> Very fast (~2ms per frame) because it evaluates a fixed number of candidates. It accounts for the robot's physical limits (minimum turn radius, maximum speed).</p>
+</div>
+
+<div class="card highlight">
+    <h3>Overview</h3>
+    <p>The path planner is the core navigation brain. It runs <strong>every frame (~2ms latency)</strong> and produces continuous steering (-1 to +1) and speed (0 to 1) commands.</p>
+
+    <div class="flow-diagram">
+Stage 1              Stage 2              Stage 3             Stage 4              Stage 5
+┌──────────┐    ┌──────────────┐    ┌──────────────┐   ┌────────────────┐   ┌──────────────┐
+│ Occupancy│───►│   Kalman     │───►│  Cost Map    │──►│  Trajectory    │──►│   Temporal    │
+│   Grid   │    │  Filtering   │    │ Generation   │   │  Evaluation    │   │  Smoothing   │
+│ 60×80    │    │ (per-object) │    │ (5 weights)  │   │ (45 arcs, DWA)│   │  (EMA α=0.33)│
+└──────────┘    └──────────────┘    └──────────────┘   └────────────────┘   └──────────────┘
+     ▲                                                                              │
+     │                                                                              ▼
+  CV obstacles                                                              PlannerOutput:
+  ML detections                                                             steering, speed,
+  Edge map                                                                  confidence,
+  Floor mask                                                                trajectory_pixels
+    </div>
+</div>
+
+<div class="card">
+    <h3>Stage 1: Occupancy Grid</h3>
+    <p class="file-ref">File: occupancy_grid.py</p>
+    <ul>
+        <li><strong>Grid dimensions:</strong> 60 columns &times; 80 rows (3m wide &times; 4m deep, 5cm per cell)</li>
+        <li><strong>Coordinate system:</strong> Bird's-eye view. Row 0 = farthest (4m), Row 79 = closest (0m). Col 0 = left (-1.5m), Col 59 = right (+1.5m)</li>
+        <li><strong>Temporal decay:</strong> Previous occupancy decayed by factor 0.7 each frame (fades old obstacles)</li>
+        <li><strong>Projection sources:</strong>
+            <ul>
+                <li>CV tracked obstacles: bbox corners projected via perspective mapping → grid polygon filled at confidence 0.35 (1st frame) or 1.0 (confirmed)</li>
+                <li>ML segmentation masks: polygon points projected to grid, filled at confidence 1.0</li>
+                <li>Thin edge map: downsampled 4&times;, projected at confidence 0.2</li>
+                <li>Floor anomaly mask: projected at confidence 0.15</li>
+            </ul>
+        </li>
+        <li><strong>Safety inflation:</strong> Gaussian kernel (3&times;3, &sigma;=0.8) dilates obstacles for safety margin, scaled at 0.5&times;</li>
+    </ul>
+
+    <h4>Pixel &rarr; World Conversion:</h4>
+    <pre><code>def _pixel_to_world(px, py):
+    dist_m = DIST_SCALE / (py - vanish_y)  # Forward distance
+    frac = (px - FRAME_W/2) / (FRAME_W/2)  # -1 to +1 lateral
+    scale = min(dist_m, depth_m) / depth_m
+    lateral_m = frac * (width_m/2) * max(scale, 0.15)
+    return (lateral_m, dist_m)</code></pre>
+</div>
+
+<div class="card">
+    <h3>Stage 2: Obstacle State Estimation (Kalman Filter)</h3>
+    <p class="file-ref">File: obstacle_estimator.py</p>
+    <ul>
+        <li><strong>Filter type:</strong> Constant-velocity Kalman filter (4 states: x, y, vx, vy)</li>
+        <li><strong>Per-obstacle tracking:</strong> Each tracked obstacle ID gets its own Kalman filter instance</li>
+        <li><strong>State vector:</strong> <code>[x_position, y_position, x_velocity, y_velocity]</code> in world metres</li>
+        <li><strong>Measurement:</strong> (x, y) position from pixel-to-world conversion</li>
+        <li><strong>Prediction step:</strong> <code>state = F @ state</code> where F has dt in velocity coupling positions</li>
+        <li><strong>Update step:</strong> Standard Kalman gain: <code>K = P @ H.T @ inv(H @ P @ H.T + R)</code></li>
+        <li><strong>Stale removal:</strong> Tracks removed after 10 frames unseen</li>
+        <li><strong>Confidence decay:</strong> Unseen tracks lose 10% confidence per frame</li>
+    </ul>
+
+    <h4>Kalman Filter Matrices:</h4>
+    <pre><code>F = [[1, 0, dt, 0],    # State transition (constant velocity)
+     [0, 1, 0, dt],
+     [0, 0, 1,  0],
+     [0, 0, 0,  1]]
+
+H = [[1, 0, 0, 0],    # Observation (measure position only)
+     [0, 1, 0, 0]]
+
+Q = diag([0.01, 0.01, 0.1, 0.1])   # Process noise
+R = diag([0.05, 0.05])               # Measurement noise</code></pre>
+</div>
+
+<div class="card">
+    <h3>Stage 3: Cost Map Generation</h3>
+    <p class="file-ref">File: cost_map.py</p>
+    <p>Combines 5 weighted cost layers into a single cost surface (0 = free, 1 = blocked):</p>
+    <table>
+        <tr><th>Component</th><th>Weight</th><th>Description</th></tr>
+        <tr><td>Occupancy</td><td>0.45</td><td>Direct obstacle presence from the occupancy grid</td></tr>
+        <tr><td>Repulsive Field</td><td>0.25</td><td>Gaussian decay around current obstacle positions: <code>exp(-d&sup2; / 2&sigma;&sup2;)</code>, &sigma;=4 cells</td></tr>
+        <tr><td>Predictive</td><td>0.15</td><td>Repulsive fields at predicted future positions (0.3s, 0.6s, 1.0s horizons)</td></tr>
+        <tr><td>Boundary</td><td>0.05</td><td>Higher cost near grid edges (prevents wall-hugging)</td></tr>
+        <tr><td>Attractive</td><td>0.10</td><td>Lower cost toward forward-centre (goal attraction)</td></tr>
+    </table>
+
+    <h4>Predictive Cost (Anticipatory Avoidance):</h4>
+    <pre><code># For each obstacle, predict future positions and add repulsive cost
+for obstacle in obstacle_states:
+    for t in [0.3, 0.6, 1.0]:  # seconds ahead
+        future_x = obs.x + obs.vx * t
+        future_y = obs.y + obs.vy * t
+        weight = 1.0 / (1.0 + t)  # Closer predictions have higher weight
+        pred_cost += repulsive_field(future_x, future_y) * weight * confidence</code></pre>
+</div>
+
+<div class="card">
+    <h3>Stage 4: Trajectory Evaluation (Dynamic Window Approach)</h3>
+    <p class="file-ref">File: trajectory_evaluator.py</p>
+
+    <h4>Candidate Generation:</h4>
+    <ul>
+        <li><strong>15 steering angles:</strong> linearly spaced from -1.0 to +1.0</li>
+        <li><strong>3 speed levels:</strong> 0.33, 0.66, 1.0</li>
+        <li><strong>Total:</strong> 45 candidate trajectories evaluated per frame</li>
+        <li><strong>Trajectory shape:</strong> Circular arcs with <code>radius = MIN_TURN_RADIUS / |steering|</code></li>
+        <li><strong>Look-ahead:</strong> 1.5m forward, sampled at 10 points per arc</li>
+    </ul>
+
+    <h4>Feasibility Check:</h4>
+    <ul>
+        <li>Rejected if any point's cost &gt; 0.9 (MAX_COST_THRESHOLD)</li>
+        <li>Rejected if clearance &lt; 8cm (MIN_CLEARANCE_M)</li>
+        <li>Rejected if nearest obstacle &lt; emergency stop distance (0.25m)</li>
+    </ul>
+
+    <h4>Scoring Weights (lower total cost = better):</h4>
+    <table>
+        <tr><th>Cost</th><th>Weight</th><th>Formula</th></tr>
+        <tr><td>Obstacle</td><td>0.35</td><td>Average cost along trajectory path</td></tr>
+        <tr><td>Heading</td><td>0.25</td><td><code>|steering|</code> — penalizes deviation from straight</td></tr>
+        <tr><td>Clearance</td><td>0.15</td><td><code>1 - min_clearance/max_clearance</code> — rewards safety margin</td></tr>
+        <tr><td>Progress</td><td>0.15</td><td><code>1 - max_forward_y/look_ahead</code> — rewards forward movement</td></tr>
+        <tr><td>Smoothness</td><td>0.10</td><td><code>|steering - prev_steering| / 2</code> — penalizes direction changes</td></tr>
+    </table>
+
+    <h4>Robot Physical Parameters:</h4>
+    <pre><code>ROBOT_WIDTH_M   = 0.17    // 17 cm wide
+ROBOT_LENGTH_M  = 0.20    // 20 cm long
+MIN_TURN_RADIUS = 0.30    // Minimum turning radius: 30 cm</code></pre>
+</div>
+
+<div class="card">
+    <h3>Stage 5: Temporal Smoothing</h3>
+    <ul>
+        <li><strong>Exponential Moving Average (EMA):</strong> <code>&alpha; = 2/(5+1) = 0.33</code></li>
+        <li><code>smoothed = &alpha; &times; raw + (1-&alpha;) &times; previous</code></li>
+        <li>Prevents jerky steering from frame-to-frame noise</li>
+        <li>STOP bypasses smoothing (safety override)</li>
+        <li><strong>Direction hold:</strong> 300ms minimum before allowing direction change (prevents oscillation)</li>
+    </ul>
+
+    <h3>Recovery Behavior</h3>
+    <ul>
+        <li>If all paths blocked for N consecutive frames (default: 5), activates recovery turn</li>
+        <li>Direction chosen by comparing left vs. right average cost map values</li>
+        <li>Recovery parameters: speed=0.5, steering=0.8</li>
+    </ul>
+</div>
+
+<!-- ============================================================ -->
+<!-- 10. AI DECISION ENGINE -->
+<!-- ============================================================ -->
+<h2 id="ai-decision">10. AI Decision Engine &amp; LLM Integration</h2>
+<p class="file-ref">File: backend/services/ai_decision.py</p>
+
+<div class="card info">
+    <h3>What is the AI Decision Engine?</h3>
+    <p>The AI Decision Engine is the <strong>"brain" that makes the final call</strong> on where the robot should go. It takes all the information from the CV pipeline, ML detector, and path planner, and decides: "Go forward", "Turn left", "Turn right", or "Stop".</p>
+
+    <h3>What is an LLM (Large Language Model)?</h3>
+    <p>An <strong>LLM</strong> is an AI model trained on massive amounts of text data that can understand and generate human language. ChatGPT, Claude, and Gemini are all LLMs. In our project, we use <strong>Claude (via VIO Cloud)</strong> as a backup brain &mdash; when the local path planner isn't confident about what to do, it asks the LLM for a "second opinion".</p>
+
+    <h3>Why a Two-Tier Decision System?</h3>
+    <p>Think of it like driving with a co-pilot:</p>
+    <ul>
+        <li><strong>Tier 1 (Local Path Planner):</strong> The main driver. Makes decisions every frame (~2ms). No internet needed. Handles 95% of situations.</li>
+        <li><strong>Tier 2 (Cloud LLM):</strong> The co-pilot. Only consulted when the driver isn't sure (confidence &lt; 40%). Takes 2-8 seconds (network call). Provides a "second opinion" with reasoning.</li>
+    </ul>
+    <p><strong>Advantage:</strong> The robot never freezes waiting for the cloud &mdash; the local planner always has an answer. The LLM only improves decisions in tricky situations. If the internet goes down, the robot keeps navigating with Tier 1 alone.</p>
+</div>
+
+<div class="card">
+    <h3>Decision Architecture</h3>
+    <p>Two-tier decision making:</p>
+    <ol>
+        <li><strong>Primary (Fast):</strong> Local PathPlannerEngine — runs every frame, ~2ms, no network calls</li>
+        <li><strong>Fallback (Slow):</strong> VIO Cloud LLM (Claude) — only when planner confidence &lt; 0.4, runs in background, cached 10 seconds</li>
+    </ol>
+
+    <h3>Multi-Frame Direction Voting</h3>
+    <p>Prevents single-frame noise from causing wrong turns:</p>
+    <ul>
+        <li><strong>Vote window:</strong> 5 frames (deque with maxlen=5)</li>
+        <li><strong>Majority threshold:</strong> 60% consensus required</li>
+        <li><strong>STOP override:</strong> Always immediate (safety), no voting needed</li>
+        <li><strong>No consensus:</strong> Holds previous direction for stability</li>
+        <li><strong>Generation check:</strong> Only votes on NEW planner outputs (prevents duplicate votes when decision loop is faster than frame pipeline)</li>
+    </ul>
+
+    <pre><code>// Example: 5-frame vote window
+votes = [FORWARD, FORWARD, LEFT, FORWARD, FORWARD]
+→ FORWARD wins with 80% (4/5) — exceeds 60% threshold
+→ Direction confirmed as FORWARD</code></pre>
+</div>
+
+<div class="card">
+    <h3>Pulse-Based Motor Control</h3>
+    <p>Instead of continuous commands, the robot uses a pulse pattern:</p>
+    <ol>
+        <li>Send motor command (e.g., FORWARD)</li>
+        <li>Run for pulse duration (500ms)</li>
+        <li>Auto-stop → wait for fresh frame analysis</li>
+        <li>Decide again based on new scene data</li>
+    </ol>
+    <p><strong>Why:</strong> Ensures the robot analyzes the scene between every movement pulse, preventing it from driving blind.</p>
+</div>
+
+<div class="card">
+    <h3>VIO Cloud LLM Integration</h3>
+    <ul>
+        <li><strong>API:</strong> VIO Automotive Cloud platform (custom enterprise endpoint)</li>
+        <li><strong>Model:</strong> Claude 4.5 Sonnet (configurable)</li>
+        <li><strong>Triggered when:</strong> Local planner confidence &lt; 0.4 AND action is not STOP</li>
+        <li><strong>Non-blocking:</strong> Runs as background <code>asyncio.Task</code>, never delays navigation</li>
+        <li><strong>Cache:</strong> Results cached for 10 seconds</li>
+        <li><strong>Prompt format:</strong> Structured scene description with lane status, obstacles, detections, and rules</li>
+        <li><strong>Response parsing:</strong> Extracts ACTION, REASONING, CONFIDENCE from text response</li>
+    </ul>
+
+    <pre><code># Scene prompt sent to LLM:
+LANE STATUS: LEFT:clear CENTER:blocked RIGHT:caution Free:left Nearest:0.8m
+OBSTACLES:
+  - #3 at 0.8m, lane=CENTER, zone=DANGER
+EVIDENCE:
+  - person (85%) in CAUTION
+MOTOR: forward
+
+RULES: Follow free_path. Evidence→approach. All blocked→STOP.
+
+Respond:
+ACTION: left
+REASONING: Center blocked, left lane clear
+CONFIDENCE: 0.8</code></pre>
+</div>
+
+<!-- ============================================================ -->
+<!-- 11. MQTT -->
+<!-- ============================================================ -->
+<h2 id="mqtt">11. MQTT Remote Connectivity</h2>
+<p class="file-ref">File: backend/services/mqtt_bridge.py</p>
+
+<div class="card info">
+    <h3>What is MQTT?</h3>
+    <p><strong>MQTT (Message Queuing Telemetry Transport)</strong> is a lightweight messaging protocol designed for IoT (Internet of Things) devices. Think of it like a <strong>WhatsApp group</strong>:</p>
+    <ul>
+        <li>There's a central <strong>broker</strong> (like the WhatsApp server) &mdash; in our case, HiveMQ Cloud</li>
+        <li>Devices <strong>subscribe</strong> to topics (like joining a group) to receive messages</li>
+        <li>Devices <strong>publish</strong> messages to topics (like sending a message to the group)</li>
+        <li>Any device subscribed to a topic gets the message instantly</li>
+    </ul>
+    <p><strong>Example in our system:</strong> The Python backend publishes <code>{"dir":"forward","speed":200}</code> to the topic <code>dogbot/cmd/motor</code>. The ESP32 is subscribed to this topic, so it receives the command and moves the motors forward.</p>
+
+    <h3>Why MQTT instead of HTTP for remote control?</h3>
+    <table>
+        <tr><th>Feature</th><th>HTTP</th><th>MQTT</th></tr>
+        <tr><td>Connection</td><td>Opens and closes for each request (overhead)</td><td>Stays open permanently (persistent connection)</td></tr>
+        <tr><td>Direction</td><td>Client asks, server responds (one-way)</td><td>Both sides can send anytime (bidirectional)</td></tr>
+        <tr><td>Message size</td><td>Large headers (~700 bytes)</td><td>Tiny headers (~2 bytes) &mdash; ideal for IoT</td></tr>
+        <tr><td>Network</td><td>Needs reliable network</td><td>Designed for unreliable/slow networks</td></tr>
+        <tr><td>Remote access</td><td>Needs public IP or port forwarding</td><td>Works through firewalls via cloud broker</td></tr>
+    </table>
+    <p><strong>Key advantage:</strong> With MQTT, the operator can control the robot from <strong>anywhere in the world</strong> as long as both devices have internet access. No VPN or port forwarding needed.</p>
+
+    <h3>What is TLS?</h3>
+    <p><strong>TLS (Transport Layer Security)</strong> is encryption for network communication. It's the same technology that makes websites show "https://" instead of "http://". Without TLS, anyone snooping on the network could see (or modify) the motor commands being sent to the robot. With TLS, all MQTT messages are encrypted &mdash; only the ESP32 and backend can read them.</p>
+</div>
+
+<div class="card">
+    <h3>Architecture</h3>
+    <ul>
+        <li><strong>Broker:</strong> HiveMQ Cloud (managed MQTT service)</li>
+        <li><strong>Protocol:</strong> MQTT 3.1.1 over TLS (port 8883)</li>
+        <li><strong>Library:</strong> <code>aiomqtt</code> (async Python MQTT client, wraps paho-mqtt)</li>
+        <li><strong>Authentication:</strong> Username/password</li>
+        <li><strong>TLS:</strong> <code>ssl.create_default_context()</code> passed as <code>tls_context</code></li>
+    </ul>
+
+    <h3>MQTT Topics</h3>
+    <table>
+        <tr><th>Topic</th><th>Direction</th><th>QoS</th><th>Payload</th></tr>
+        <tr><td><code>dogbot/cmd/motor</code></td><td>Backend → ESP32</td><td>1</td><td><code>{"dir":"forward","speed":200}</code></td></tr>
+        <tr><td><code>dogbot/status</code></td><td>ESP32 → Backend</td><td>1</td><td><code>{"rssi":-45,"uptime":120,"motor":"forward","speed":200}</code></td></tr>
+        <tr><td><code>dogbot/heartbeat</code></td><td>ESP32 → Backend</td><td>0</td><td><code>{"alive":true}</code></td></tr>
+    </table>
+
+    <h3>Dual Connectivity (MQTT + HTTP Fallback)</h3>
+    <pre><code>async def send_motor_command(direction, speed):
+    # 1. Try MQTT first (works over internet)
+    if mqtt_bridge.connected:
+        result = await mqtt_bridge.publish_motor_command(direction, speed)
+        if result: return True
+
+    # 2. Fall back to HTTP (local network only)
+    url = f"http://192.168.1.100/motor?dir={direction}&speed={speed}"
+    response = await http_client.get(url)
+    return response.status_code == 200</code></pre>
+</div>
+
+<!-- ============================================================ -->
+<!-- 12. WEBSOCKET -->
+<!-- ============================================================ -->
+<h2 id="websocket">12. WebSocket Communication</h2>
+
+<div class="card info">
+    <h3>What is a WebSocket?</h3>
+    <p>To understand WebSocket, first understand how normal HTTP works:</p>
+    <ul>
+        <li><strong>HTTP (normal web requests)</strong> is like <strong>sending letters</strong>: you send a request, wait for a response, and the conversation ends. If you want new data, you send another letter. This is fine for loading a webpage, but terrible for live video &mdash; you'd have to send 15 requests per second!</li>
+        <li><strong>WebSocket</strong> is like a <strong>phone call</strong>: once the connection is established, both sides can talk freely at any time, without hanging up and calling again. The connection stays open until one side hangs up.</li>
+    </ul>
+    <p><strong>Where is it used in our project?</strong></p>
+    <ul>
+        <li><strong>Video stream</strong> (<code>/ws/video</code>): The server pushes 15 frames per second to the browser. With HTTP, the browser would need to ask 15 times per second. With WebSocket, the server just keeps sending.</li>
+        <li><strong>Control channel</strong> (<code>/ws/control</code>): The browser sends motor commands, and the server sends back AI decisions and alerts &mdash; both directions, anytime.</li>
+    </ul>
+    <p><strong>Why WebSocket over HTTP polling?</strong></p>
+    <ul>
+        <li><strong>Lower latency</strong> &mdash; No overhead of opening/closing connections for each frame</li>
+        <li><strong>Real-time</strong> &mdash; Server pushes data instantly instead of waiting for client to ask</li>
+        <li><strong>Less bandwidth</strong> &mdash; No repeated HTTP headers for every frame</li>
+        <li><strong>Bidirectional</strong> &mdash; Client and server can send data at the same time</li>
+    </ul>
+
+    <h3>What is Backpressure?</h3>
+    <p>Imagine a water pipe: if water flows in faster than it flows out, the pipe bursts. Similarly, if the server sends frames faster than the browser can display them, frames pile up in memory and cause increasing lag. <strong>Backpressure</strong> solves this by setting a limit (queue of 2 frames) &mdash; if the client is slow, the oldest frame is dropped so the client always sees the <em>latest</em> frame, not a delayed one.</p>
+</div>
+
+<div class="card">
+    <h3>Video WebSocket (<code>/ws/video</code>)</h3>
+    <ul>
+        <li><strong>Pattern:</strong> Pub/Sub with backpressure</li>
+        <li>Clients subscribe via <code>frame_manager.subscribe()</code> → get a <code>asyncio.Queue(maxsize=2)</code></li>
+        <li>FrameManager broadcasts JSON <code>FrameResult</code> to all subscriber queues</li>
+        <li><strong>Backpressure:</strong> If queue is full, oldest frame is dropped (prevents lag accumulation)</li>
+        <li>Data: Base64-encoded JPEG frame + telemetry + detections + obstacles</li>
+    </ul>
+
+    <h3>Control WebSocket (<code>/ws/control</code>)</h3>
+    <ul>
+        <li><strong>Bidirectional:</strong> Client sends commands, server broadcasts decisions</li>
+        <li><strong>Inbound messages:</strong>
+            <ul>
+                <li><code>{"type":"motor","direction":"forward","speed":200}</code> — Manual motor command</li>
+                <li><code>{"type":"mode","value":"semi_auto"}</code> — Switch control mode</li>
+            </ul>
+        </li>
+        <li><strong>Outbound messages:</strong>
+            <ul>
+                <li><code>{"type":"ai_decision",...}</code> — AI navigation decision</li>
+                <li><code>{"type":"alert",...}</code> — High-confidence detection alert</li>
+                <li><code>{"type":"motor_ack",...}</code> — Motor command acknowledgement</li>
+                <li><code>{"type":"mode_change",...}</code> — Mode switch confirmation</li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<!-- ============================================================ -->
+<!-- 13. FRONTEND -->
+<!-- ============================================================ -->
+<h2 id="frontend">13. Frontend Dashboard</h2>
+<p class="file-ref">Files: backend/static/index.html, js/app.js, js/controls.js, js/panels.js, css/dashboard.css</p>
+
+<div class="card info">
+    <h3>What is the Frontend Dashboard?</h3>
+    <p>The dashboard is the <strong>web page you open in your browser</strong> to see the robot's live video feed, control it manually, and monitor its status. Think of it like a <strong>drone controller app</strong> &mdash; you see what the robot sees, press buttons to move it, and read telemetry data (speed, FPS, obstacles detected).</p>
+    <p><strong>Why Vanilla JavaScript (no framework)?</strong></p>
+    <ul>
+        <li><strong>Simplicity</strong> &mdash; No build tools (webpack, vite), no npm packages, no compilation step. Just open the HTML file.</li>
+        <li><strong>Lightweight</strong> &mdash; The dashboard is a small, fast-loading page. React/Vue/Angular would add 100KB+ of framework code for a simple UI.</li>
+        <li><strong>Easy to understand</strong> &mdash; Anyone who knows basic HTML/CSS/JS can read and modify the dashboard.</li>
+    </ul>
+</div>
+
+<div class="card">
+    <h3>Architecture</h3>
+    <ul>
+        <li><strong>No framework:</strong> Vanilla JavaScript for minimal overhead</li>
+        <li><strong>Main object:</strong> <code>DogBot</code> singleton manages WebSocket connections and state</li>
+        <li><strong>Two WebSocket connections:</strong> Video (receives frames) + Control (sends commands, receives decisions)</li>
+        <li><strong>Auto-reconnect:</strong> 2-second delay on disconnect</li>
+    </ul>
+
+    <h3>Features</h3>
+    <ul>
+        <li><strong>Live video feed:</strong> Base64 JPEG frames rendered in <code>&lt;img&gt;</code> tag</li>
+        <li><strong>Directional controls:</strong> Forward, Back, Left, Right, Stop buttons</li>
+        <li><strong>Speed slider:</strong> 0-255 PWM value</li>
+        <li><strong>Mode toggle:</strong> MANUAL ↔ SEMI_AUTO</li>
+        <li><strong>Telemetry panel:</strong> FPS, latency, obstacle count, lane status, planner stats</li>
+        <li><strong>Detection log:</strong> Scrolling log of AI decisions and detection alerts</li>
+        <li><strong>Connection indicator:</strong> Green/red status for backend connectivity</li>
+    </ul>
+</div>
+
+<!-- ============================================================ -->
+<!-- 14. CONFIGURATION -->
+<!-- ============================================================ -->
+<h2 id="config">14. Configuration &amp; Environment</h2>
+<p class="file-ref">File: backend/config.py, .env, .env.example</p>
+
+<div class="card info">
+    <h3>What is a .env file?</h3>
+    <p>A <code>.env</code> file stores <strong>configuration settings</strong> like passwords, IP addresses, and API keys in a simple format: <code>KEY=VALUE</code>. It's like a settings page for your application. You change settings here without modifying any code.</p>
+    <p><strong>Why not hardcode settings in the code?</strong></p>
+    <ul>
+        <li><strong>Security</strong> &mdash; Passwords and API keys should never be in the code (which is shared via Git)</li>
+        <li><strong>Flexibility</strong> &mdash; Different machines can have different settings (e.g., different ESP32 IP addresses)</li>
+        <li><strong>Convenience</strong> &mdash; Change a setting and restart the app, no code editing needed</li>
+    </ul>
+
+    <h3>What is Pydantic?</h3>
+    <p><strong>Pydantic</strong> is a Python library for <strong>data validation</strong>. It checks that data matches the expected type and format. For example, if a setting should be a number and someone accidentally types "abc", Pydantic catches the error immediately at startup instead of crashing later during operation.</p>
+    <p><strong>How it's used here:</strong> All settings from the <code>.env</code> file are loaded into a Pydantic <code>Settings</code> class. Pydantic validates every value, provides defaults for optional settings, and makes them accessible as Python attributes (e.g., <code>settings.esp32_stream_url</code>).</p>
+</div>
+
+<div class="card">
+    <h3>Pydantic Settings</h3>
+    <p>All configuration managed via <code>pydantic_settings.BaseSettings</code> with <code>.env</code> file support:</p>
+
+    <table>
+        <tr><th>Category</th><th>Key Settings</th></tr>
+        <tr><td>ESP32</td><td><code>esp32_stream_url</code> (MJPEG), <code>esp32_control_url</code> (HTTP), <code>esp32_timeout</code></td></tr>
+        <tr><td>VIO LLM</td><td><code>vio_base_url</code>, <code>vio_username</code>, <code>vio_api_token</code>, <code>vio_primary_model</code></td></tr>
+        <tr><td>MQTT</td><td><code>mqtt_broker_host</code>, <code>mqtt_broker_port</code>, <code>mqtt_username</code>, <code>mqtt_password</code>, <code>mqtt_use_tls</code></td></tr>
+        <tr><td>CV Pipeline</td><td><code>cv_contour_min_area</code>, <code>cv_canny_low/high</code>, <code>cv_blur_kernel</code>, <code>cv_edge_gradient_threshold</code>, <code>cv_floor_confidence</code></td></tr>
+        <tr><td>ML Detection</td><td><code>ml_model_path</code>, <code>ml_confidence_threshold</code>, <code>ml_detect_every_n_frames</code></td></tr>
+        <tr><td>Path Planner</td><td><code>planner_grid_width_m</code> (3.0), <code>planner_grid_depth_m</code> (4.0), <code>planner_cell_size_m</code> (0.05), <code>planner_emergency_stop_dist_m</code></td></tr>
+        <tr><td>AI Decision</td><td><code>ai_decision_interval</code> (66ms ≈ 15Hz), <code>ai_manual_pause_seconds</code> (5s)</td></tr>
+        <tr><td>Motor</td><td><code>motor_forward_steering_bias</code> (0.05 — compensates rightward drift in software)</td></tr>
+        <tr><td>App</td><td><code>app_host</code> (0.0.0.0), <code>app_port</code> (8000)</td></tr>
+    </table>
+</div>
+
+<!-- ============================================================ -->
+<!-- 15. SCHEMAS -->
+<!-- ============================================================ -->
+<h2 id="schemas">15. Data Models &amp; Schemas</h2>
+<p class="file-ref">Files: backend/models/schemas.py, backend/services/path_planner/schemas.py</p>
+
+<div class="card info">
+    <h3>What are Data Models / Schemas?</h3>
+    <p>When different parts of the system communicate, they need to agree on the <strong>structure of the data</strong>. A schema is like a <strong>form template</strong> &mdash; it defines exactly what fields are required, what type each field should be, and what values are allowed.</p>
+    <p>For example, when the CV pipeline detects an obstacle, it creates a <code>TrackedObstacle</code> object with specific fields: id (number), distance_m (float), zone (DANGER/CAUTION/SAFE), etc. Every service that receives this object knows exactly what to expect.</p>
+    <p><strong>Why use schemas?</strong> Without them, one service might send <code>{"dist": 1.5}</code> while another expects <code>{"distance_m": 1.5}</code> &mdash; causing silent bugs. Schemas enforce consistency across the entire system.</p>
+</div>
+
+<div class="card">
+    <h3>Core Pydantic Models</h3>
+    <table>
+        <tr><th>Model</th><th>Fields</th><th>Used For</th></tr>
+        <tr><td><code>MotorDirection</code></td><td>FORWARD, BACK, LEFT, RIGHT, STOP</td><td>Enum for motor commands</td></tr>
+        <tr><td><code>ControlMode</code></td><td>MANUAL, SEMI_AUTO</td><td>Enum for operation modes</td></tr>
+        <tr><td><code>Detection</code></td><td>class_name, confidence, bbox, zone, track_id, mask</td><td>ML detection result</td></tr>
+        <tr><td><code>TrackedObstacle</code></td><td>id, bbox, centroid, zone, lane, distance_m, velocity_px, threat_level, ttc</td><td>CV obstacle with tracking</td></tr>
+        <tr><td><code>LaneStatus</code></td><td>left, center, right (clear/caution/blocked), free_path, nearest_obstacle_m</td><td>Lane analysis result</td></tr>
+        <tr><td><code>AIDecision</code></td><td>action, reasoning, confidence, timestamp, overridden</td><td>Navigation decision</td></tr>
+        <tr><td><code>SystemTelemetry</code></td><td>fps, rssi, ai_latency_ms, detection/obstacle count, mode, motor_state, planner stats</td><td>System monitoring</td></tr>
+        <tr><td><code>FrameResult</code></td><td>timestamp, detections[], obstacles[], lane_status, telemetry, frame_b64</td><td>Complete frame broadcast</td></tr>
+    </table>
+
+    <h3>Path Planner Dataclasses</h3>
+    <table>
+        <tr><th>Model</th><th>Fields</th><th>Used For</th></tr>
+        <tr><td><code>GridConfig</code></td><td>width_m, depth_m, cell_size_m → cols=60, rows=80</td><td>Occupancy grid dimensions</td></tr>
+        <tr><td><code>ObstacleState</code></td><td>track_id, x, y, vx, vy, radius, confidence, class_name</td><td>Kalman-filtered obstacle</td></tr>
+        <tr><td><code>CandidateTrajectory</code></td><td>steering, speed, obstacle/heading/smoothness/clearance/progress costs, total_cost, feasible</td><td>Evaluated trajectory arc</td></tr>
+        <tr><td><code>PlannerOutput</code></td><td>steering (-1..+1), speed (0..1), confidence, reasoning, latency_ms, trajectory_pixels</td><td>Final planner output</td></tr>
+    </table>
+</div>
+
+<!-- ============================================================ -->
+<!-- 16. KEY CONCEPTS -->
+<!-- ============================================================ -->
+<h2 id="concepts">16. Key CS/Robotics Concepts Used</h2>
+
+<div class="card info">
+    <p>This section is a quick reference of all the technical concepts used in the project. Each concept includes a brief "in simple terms" explanation.</p>
+</div>
+
+<div class="grid-2">
+    <div class="card">
+        <h3>Computer Vision</h3>
+        <ul>
+            <li><strong>Background Subtraction (MOG2):</strong> Learns what the scene normally looks like and flags anything new as an obstacle. <em>Technical: Gaussian Mixture Model separating foreground from background.</em></li>
+            <li><strong>Canny Edge Detection:</strong> Finds sharp boundaries between objects by detecting where brightness changes suddenly. <em>Technical: Gaussian blur &rarr; Sobel gradient &rarr; non-maximum suppression &rarr; hysteresis thresholding.</em></li>
+            <li><strong>Sobel Operators:</strong> Measures how quickly image brightness changes, used to detect edges and textures. <em>Technical: First-order derivative filters for image gradients in x/y.</em></li>
+            <li><strong>Dense Optical Flow (Farneback):</strong> Detects motion by comparing two consecutive frames pixel by pixel. <em>Technical: Polynomial expansion method for computing motion field.</em></li>
+            <li><strong>Hough Transform:</strong> Finds straight lines in an image, used to estimate where the floor meets the walls (vanishing point). <em>Technical: Probabilistic line detection.</em></li>
+            <li><strong>Morphological Operations:</strong> Cleans up noisy images by removing small dots (opening) and filling small gaps (closing). <em>Technical: Uses elliptical/rectangular kernels.</em></li>
+            <li><strong>Perspective Projection:</strong> Converts pixel positions in the camera image to real-world distances in meters. <em>Technical: Inverse perspective mapping from pixel space to metric coordinates.</em></li>
+            <li><strong>MJPEG Protocol:</strong> Streams video as a series of JPEG images sent one after another. <em>Technical: Multipart HTTP with boundary markers.</em></li>
+        </ul>
+    </div>
+    <div class="card">
+        <h3>Machine Learning</h3>
+        <ul>
+            <li><strong>YOLOv8 (You Only Look Once):</strong> An AI model that identifies objects in a photo in a single pass, making it very fast. <em>Technical: Single-shot real-time object detector; nano variant for CPU efficiency.</em></li>
+            <li><strong>Instance Segmentation:</strong> Traces the exact outline of each object (not just a rectangle around it). <em>Technical: Per-object pixel masks.</em></li>
+            <li><strong>ByteTrack:</strong> Keeps track of the same object across multiple frames (e.g., "person #1 moved from here to there"). <em>Technical: Multi-object tracking using high and low confidence detections.</em></li>
+            <li><strong>Transfer Learning:</strong> Using an AI model pre-trained on millions of images instead of training from scratch. <em>Technical: Pre-trained on COCO dataset (80 classes).</em></li>
+            <li><strong>Non-Maximum Suppression (NMS):</strong> When the AI detects the same object multiple times, keep only the most confident detection. <em>Technical: Removes overlapping bounding boxes.</em></li>
+        </ul>
+    </div>
+    <div class="card">
+        <h3>Robotics &amp; Control</h3>
+        <ul>
+            <li><strong>Kalman Filter:</strong> Smooths noisy sensor readings and predicts where obstacles will be next. Like GPS smoothing your position. <em>Technical: Optimal recursive estimator for linear dynamic systems.</em></li>
+            <li><strong>Occupancy Grid:</strong> A bird's-eye-view map divided into small squares showing where obstacles are. <em>Technical: Probabilistic spatial representation of environment.</em></li>
+            <li><strong>Dynamic Window Approach (DWA):</strong> Tries many possible curved paths and picks the best one. <em>Technical: Evaluates trajectory candidates within robot's kinematic constraints.</em></li>
+            <li><strong>Potential Fields:</strong> Obstacles "push" the robot away, goals "pull" the robot toward them. <em>Technical: Repulsive fields around obstacles + attractive field toward goal.</em></li>
+            <li><strong>Tank Steering:</strong> The robot turns by spinning its left and right wheels at different speeds or directions. <em>Technical: Differential drive.</em></li>
+            <li><strong>PWM Motor Control:</strong> Controls motor speed by rapidly switching power on/off. More ON time = faster speed. <em>Technical: Pulse Width Modulation from digital GPIO via LEDC peripheral.</em></li>
+            <li><strong>Emergency Stop:</strong> Robot immediately stops if any obstacle is closer than 25cm. Safety cannot be overridden.</li>
+            <li><strong>Motor Trim Compensation:</strong> Software adjustment to fix the robot drifting to one side due to motor differences.</li>
+        </ul>
+    </div>
+    <div class="card">
+        <h3>Software Engineering</h3>
+        <ul>
+            <li><strong>Async/Await (asyncio):</strong> Do multiple things at once without blocking &mdash; like a chef cooking multiple dishes simultaneously. <em>Technical: Non-blocking concurrent execution for I/O-bound operations.</em></li>
+            <li><strong>Service Orchestration Pattern:</strong> One manager (FrameManager) coordinates all specialist workers. <em>Technical: Coordinates services with clear dependencies.</em></li>
+            <li><strong>Pub/Sub with Backpressure:</strong> Server pushes data to subscribers, drops old data if subscriber is slow. <em>Technical: Queue-based subscriber management.</em></li>
+            <li><strong>ASGI:</strong> The standard that lets FastAPI handle multiple requests simultaneously. <em>Technical: Asynchronous Server Gateway Interface (FastAPI + Uvicorn).</em></li>
+            <li><strong>Pydantic Validation:</strong> Automatically checks that data has the right types and values before processing. <em>Technical: Runtime type-safe model validation.</em></li>
+            <li><strong>Event Loop Patterns:</strong> <code>create_task()</code> starts background work, <code>run_in_executor()</code> runs CPU-heavy code without freezing async operations.</li>
+            <li><strong>MQTT Pub/Sub:</strong> Lightweight messaging for IoT devices &mdash; like a WhatsApp group for machines. <em>Technical: Publish/subscribe over TCP/TLS.</em></li>
+            <li><strong>FreeRTOS Multi-core:</strong> ESP32 runs camera on one CPU core and motor control on another, simultaneously. <em>Technical: Core 0 for stream, Core 1 for control.</em></li>
+            <li><strong>Graceful Shutdown:</strong> Services stop cleanly in reverse order instead of crashing. <em>Technical: CancelledError handling for clean task termination.</em></li>
+        </ul>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 17. HOW TO RUN -->
+<!-- ============================================================ -->
+<h2 id="run">17. How to Run the System</h2>
+
+<div class="card info">
+    <h3>Step 1: Install Dependencies</h3>
+    <pre><code># Create virtual environment
+python -m venv .venv
+
+# Activate (Windows)
+.venv\Scripts\activate
+
+# Install packages
+pip install -r requirements.txt</code></pre>
+
+    <h3>Step 2: Configure Environment</h3>
+    <pre><code># Copy example config
+cp .env.example .env
+
+# Edit .env with your settings:
+# - ESP32 IP address
+# - MQTT broker credentials (or leave empty to disable)
+# - VIO LLM API token</code></pre>
+
+    <h3>Step 3: Run the Application</h3>
+    <pre><code># RECOMMENDED (works on all platforms, MQTT-compatible):
+python run.py
+
+# Alternative (Windows, HTTP-only mode):
+python backend/main.py
+
+# DO NOT use on Windows (MQTT breaks):
+# python -m uvicorn backend.main:app  ← WRONG</code></pre>
+
+    <h3>Step 4: Access Dashboard</h3>
+    <ul>
+        <li><strong>Dashboard:</strong> <code>http://localhost:8000</code></li>
+        <li><strong>Pin Diagram:</strong> <code>http://localhost:8000/pin-diagram</code></li>
+        <li><strong>Setup Guide:</strong> <code>http://localhost:8000/setup-guide</code></li>
+        <li><strong>API Health:</strong> <code>http://localhost:8000/api/health</code></li>
+    </ul>
+
+    <h3>Step 5: Upload Firmware</h3>
+    <ol>
+        <li>Open <code>firmware/esp32cam_dogbot/esp32cam_dogbot.ino</code> in Arduino IDE</li>
+        <li>Install ESP32 board support (AI-Thinker ESP32-CAM)</li>
+        <li>Update WiFi SSID/password (lines 15-16)</li>
+        <li>Update MQTT broker credentials (lines 19-22)</li>
+        <li>Upload at 115200 baud</li>
+    </ol>
+</div>
+
+<!-- ============================================================ -->
+<!-- 18. FILE MAP -->
+<!-- ============================================================ -->
+<h2 id="file-map">18. File Map &amp; Responsibilities</h2>
+
+<div class="card">
+    <pre><code>dog-bot/code/
+├── run.py                          # Entry point (Windows MQTT fix)
+├── requirements.txt                # Python dependencies
+├── .env                            # Runtime configuration (secrets!)
+├── .env.example                    # Configuration template
+├── yolov8n-seg.pt                  # YOLOv8 nano segmentation model
+├── CLAUDE.md                       # Project documentation for AI tools
+│
+├── backend/
+│   ├── main.py                     # FastAPI app, lifespan, router mounting
+│   ├── config.py                   # Pydantic settings (loads .env)
+│   │
+│   ├── models/
+│   │   └── schemas.py              # Pydantic data models (Detection, Obstacle, etc.)
+│   │
+│   ├── routers/
+│   │   ├── video_ws.py             # WebSocket: video frame broadcasting
+│   │   ├── control_ws.py           # WebSocket: motor commands, AI decisions
+│   │   └── api.py                  # REST API: health, telemetry, mode
+│   │
+│   ├── services/
+│   │   ├── esp32_client.py         # ESP32 MJPEG stream + motor control + webcam fallback
+│   │   ├── cv_pipeline.py          # Computer vision: MOG2, Canny, Sobel, optical flow
+│   │   ├── ml_detector.py          # YOLOv8n-seg detection + ByteTrack tracking
+│   │   ├── ai_decision.py          # AI decision: voting, pulse control, LLM fallback
+│   │   ├── mqtt_bridge.py          # MQTT TLS bridge to HiveMQ Cloud
+│   │   ├── frame_manager.py        # Main orchestrator: coordinates all services
+│   │   │
+│   │   └── path_planner/
+│   │       ├── engine.py           # 5-stage pipeline orchestrator
+│   │       ├── occupancy_grid.py   # Bird's-eye grid from obstacles/detections
+│   │       ├── obstacle_estimator.py # Per-obstacle Kalman filter
+│   │       ├── cost_map.py         # Weighted cost surface generation
+│   │       ├── trajectory_evaluator.py # DWA trajectory scoring
+│   │       └── schemas.py          # GridConfig, PlannerOutput dataclasses
+│   │
+│   └── static/
+│       ├── index.html              # Main dashboard UI
+│       ├── pin_diagram.html        # ESP32-CAM pin reference
+│       ├── setup_guide.html        # Hardware setup instructions
+│       ├── css/dashboard.css       # Dashboard styles
+│       └── js/
+│           ├── app.js              # WebSocket management, main DogBot object
+│           ├── controls.js         # Keyboard/button motor controls
+│           └── panels.js           # Telemetry, detection log, UI panels
+│
+└── firmware/
+    └── esp32cam_dogbot/
+        └── esp32cam_dogbot.ino     # ESP32-CAM firmware (camera + motors + MQTT)</code></pre>
+</div>
+
+<!-- ============================================================ -->
+<!-- 19. VIVA Q&A -->
+<!-- ============================================================ -->
+<h2 id="viva">19. Viva Voce Q&amp;A Bank</h2>
+
+<div class="card info">
+    <p>Below are likely viva voce questions with detailed answers. Each answer starts with a <strong>simple explanation</strong> followed by technical details. Click to expand each question.</p>
+    <p><strong>Tip:</strong> Read through all questions. If an examiner asks something not listed here, the answer is likely covered in the sections above.</p>
+</div>
+
+<details class="viva">
+    <summary>Q1: What is the overall architecture of the DogBot system?</summary>
+    <p><strong>Simple answer:</strong> The system has 3 parts that work together like a remote-controlled surveillance drone: (1) The robot itself (ESP32-CAM), (2) The laptop brain (Python backend), and (3) The control screen (web dashboard in the browser).</p>
+    <p><strong>Detailed answer:</strong> DogBot follows a <strong>three-layer architecture</strong>: (1) <strong>Embedded layer</strong> &mdash; ESP32-CAM (a small microcontroller with a camera) runs Arduino C++ firmware. It captures live video as an MJPEG stream on port 81 and receives motor commands via HTTP (port 80) or MQTT (over the internet). (2) <strong>Backend layer</strong> &mdash; A Python FastAPI server running on your laptop acts as the brain. It receives the video feed, processes it with computer vision (OpenCV), detects objects with AI (YOLOv8), plans a safe path (5-stage pipeline with Kalman filtering), and sends motor commands back to the ESP32. (3) <strong>Frontend layer</strong> &mdash; A web dashboard (opened in Chrome/Firefox) that shows live video, detection overlays, telemetry, and manual controls. It connects to the backend via two WebSocket connections (one for video, one for control).</p>
+</details>
+
+<details class="viva">
+    <summary>Q2: How does the obstacle detection work? What methods are used?</summary>
+    <p><strong>Simple answer:</strong> We use 4 different "eyes" to look for obstacles, each detecting different things. If multiple methods agree something is there, we're confident it's a real obstacle. On top of that, an AI model (YOLOv8) tells us <em>what</em> the object is (person, chair, etc.).</p>
+    <p><strong>Detailed answer:</strong> We use <strong>multi-sensor fusion</strong> combining 4 methods: (1) <strong>Background Subtraction (MOG2)</strong> &mdash; the camera learns what the normal background looks like and flags anything new. Good for detecting any new object, but struggles when the robot moves. (2) <strong>Canny Edge Detection</strong> &mdash; finds sharp boundaries between objects by detecting where brightness changes. Fast and works while moving. (3) <strong>Sobel Gradient Magnitude</strong> &mdash; measures edge strength, especially good at detecting thin vertical structures like table legs and poles. (4) <strong>Dense Optical Flow (Farneback)</strong> &mdash; compares consecutive frames to detect moving objects. The only method that detects motion. Additionally, <strong>YOLOv8n-seg</strong> provides AI-based detection that identifies what each object actually is (person, chair, bottle). All results are combined in the occupancy grid, where each source contributes at different confidence levels.</p>
+</details>
+
+<details class="viva">
+    <summary>Q3: What is a Kalman filter and how is it used here?</summary>
+    <p><strong>Simple answer:</strong> A Kalman filter is like GPS smoothing. Your GPS shows your location jumping around slightly (noisy data), but your phone smooths it out because it knows you're walking in a straight line. The Kalman filter does the same for obstacle positions &mdash; it smooths noisy camera measurements and predicts where obstacles will be next.</p>
+    <p><strong>Detailed answer:</strong> A Kalman filter is an algorithm that combines two sources of information: (1) <strong>What we predict</strong> &mdash; based on where the obstacle was and how fast it was moving, we estimate where it should be now. (2) <strong>What we see</strong> &mdash; the camera's new measurement of the obstacle position. The filter blends these two using a "Kalman Gain" that automatically adjusts based on how trustworthy each source is. Technically, it maintains a state vector [x, y, vx, vy] (position + velocity) with an uncertainty matrix (covariance). Each frame has two steps: <strong>Predict</strong> (project state forward: x_new = x + vx&times;dt) and <strong>Update</strong> (correct prediction with new measurement). In our system, each tracked obstacle gets its own Kalman filter. This provides smooth positions and enables <strong>future prediction</strong> &mdash; "this person will be at position X in 0.5 seconds" &mdash; so the robot can dodge proactively.</p>
+</details>
+
+<details class="viva">
+    <summary>Q4: Explain the path planning pipeline in detail.</summary>
+    <p><strong>Simple answer:</strong> Every frame (15 times per second), the robot builds a bird's-eye map of obstacles, smooths their positions, creates a "danger map", tries 45 possible paths, picks the safest one, and smooths the steering. All of this takes only ~2 milliseconds.</p>
+    <p><strong>Detailed answer:</strong> Our path planner runs a <strong>5-stage pipeline every frame (~2ms)</strong>:
+    <strong>Stage 1 &mdash; Occupancy Grid:</strong> Creates a 60×80 bird's-eye grid (3m×4m, 5cm resolution) by projecting CV obstacles, ML detections, edge maps, and floor masks using inverse perspective mapping.
+    <strong>Stage 2 — Kalman Filtering:</strong> Per-obstacle constant-velocity Kalman filters smooth positions and estimate velocities.
+    <strong>Stage 3 — Cost Map:</strong> Combines 5 weighted layers: occupancy (0.45), repulsive potential fields (0.25), predictive future positions (0.15), boundary cost (0.05), and attractive goal field (0.10).
+    <strong>Stage 4 — Trajectory Evaluation (DWA):</strong> Generates 45 candidate circular arcs (15 steering × 3 speeds), samples 10 points along each, scores by obstacle/heading/smoothness/clearance/progress costs, rejects infeasible ones.
+    <strong>Stage 5 — Temporal Smoothing:</strong> Exponential Moving Average (α=0.33) smooths steering and speed to prevent jitter.</p>
+</details>
+
+<details class="viva">
+    <summary>Q5: What is YOLOv8 and why did you choose the nano-seg variant?</summary>
+    <p><strong>Simple answer:</strong> YOLO is an AI model that looks at a photo and instantly identifies every object in it. We use the smallest version ("nano", 6.7MB) with segmentation so it traces the exact shape of each object. It can run on a regular laptop CPU without needing an expensive GPU.</p>
+    <p><strong>Detailed answer:</strong> <strong>YOLO (You Only Look Once)</strong> is a single-shot object detector &mdash; unlike older methods that scan an image piece by piece, YOLO processes the <strong>entire image in one pass</strong>, making it extremely fast. <strong>YOLOv8</strong> is the latest version from Ultralytics. We chose <strong>YOLOv8n-seg (nano segmentation)</strong> because: (1) It's the smallest and fastest variant (~6.7MB), suitable for real-time CPU inference without a GPU. (2) The "-seg" variant provides <strong>instance segmentation masks</strong> (pixel-level outlines, not just rectangular boxes), giving the path planner precise obstacle shapes. (3) It's pre-trained on the COCO dataset (80 common objects: person, chair, dog, car, etc.), so no custom training is needed. (4) Built-in <strong>ByteTrack</strong> tracker maintains persistent object IDs across frames (person #1 stays #1 even as they move).</p>
+</details>
+
+<details class="viva">
+    <summary>Q6: How does the MQTT communication work?</summary>
+    <p><strong>Simple answer:</strong> MQTT is like a WhatsApp group for devices. The ESP32 and the Python backend both join a cloud "group" (HiveMQ broker). When the backend sends a motor command, the ESP32 receives it instantly &mdash; even if they're in different cities. It works over the internet, unlike HTTP which only works on the local WiFi network.</p>
+    <p><strong>Detailed answer:</strong> <strong>MQTT</strong> is a lightweight publish/subscribe messaging protocol designed for IoT devices. Both the <strong>ESP32</strong> and <strong>Python backend</strong> connect to a <strong>HiveMQ Cloud</strong> broker over TLS (encrypted, port 8883). The backend publishes motor commands to the <code>dogbot/cmd/motor</code> topic with QoS 1 (guaranteed at-least-once delivery). The ESP32 subscribes to this topic and executes the commands. In the other direction, the ESP32 publishes its status (WiFi signal, motor state, uptime) to <code>dogbot/status</code> every 5 seconds and a heartbeat to <code>dogbot/heartbeat</code> every 3 seconds. <strong>Key advantage:</strong> This enables remote control over the internet &mdash; the operator can be in a completely different city. If MQTT is unavailable, the system falls back to direct HTTP (local network only).</p>
+</details>
+
+<details class="viva">
+    <summary>Q7: What is the Dynamic Window Approach (DWA)?</summary>
+    <p>DWA is a <strong>local path planning algorithm</strong> that evaluates trajectories within the robot's kinematic constraints. It works by: (1) Generating a set of candidate trajectories (we use 45 arcs: 15 steering angles × 3 speeds). (2) Each trajectory is a circular arc defined by steering and speed, sampled at 10 points over 1.5m look-ahead distance. (3) Trajectories are scored by multiple weighted costs: obstacle proximity, heading deviation, steering smoothness, clearance margin, and forward progress. (4) Infeasible trajectories (too close to obstacles or high cost) are rejected. (5) The best feasible trajectory is selected. This approach is efficient (~2ms) because it evaluates a finite set of candidates rather than searching a continuous space.</p>
+</details>
+
+<details class="viva">
+    <summary>Q8: How does the system handle the ESP32 being unavailable?</summary>
+    <p>The system has a <strong>graceful fallback chain</strong>: (1) The <code>ESP32Client</code> continuously tries to connect to the ESP32's MJPEG stream. (2) If the stream fails, it automatically activates the <strong>laptop webcam</strong> as a video source (640×480 @ 20 FPS). (3) The rest of the pipeline (CV, ML, path planning) works identically regardless of video source. (4) For motor commands, if MQTT is unavailable, it falls back to direct HTTP calls. (5) When ESP32 comes back online, the webcam is stopped and ESP32 stream resumes. The <code>source</code> field in telemetry shows "esp32", "webcam", or "none".</p>
+</details>
+
+<details class="viva">
+    <summary>Q9: What is the multi-frame voting mechanism?</summary>
+    <p><strong>Simple answer:</strong> Instead of reacting to a single frame (which could be wrong due to camera noise), the robot looks at the last 5 decisions and goes with the majority. If 4 out of 5 say "go forward", it goes forward. This prevents random single-frame errors from causing the robot to zigzag. STOP is the exception &mdash; it's always immediate for safety.</p>
+    <p><strong>Detailed answer:</strong> The AI decision engine maintains a deque (sliding window) of the last 5 direction decisions. A direction is only confirmed if it has <strong>&ge;60% majority</strong> (at least 3 of 5 votes). If no direction achieves majority, the robot holds its previous direction for stability. <strong>STOP is always immediate</strong> (safety override &mdash; no voting needed). Additionally, the system only casts a new vote when a genuinely new planner output is available (tracked via generation counter), preventing the faster decision loop (15 Hz) from stuffing duplicate votes.</p>
+</details>
+
+<details class="viva">
+    <summary>Q10: Why use FastAPI and async/await?</summary>
+    <p><strong>Simple answer:</strong> FastAPI is a Python web framework &mdash; think of it as the "waiter" that takes requests from the browser and delivers responses. We chose it because it can handle many things at once (video + control + MQTT) without slowing down, and it has built-in WebSocket support for live video.</p>
+    <p><strong>Detailed answer:</strong> <strong>FastAPI</strong> was chosen because: (1) It's built on ASGI (Asynchronous Server Gateway Interface), enabling native <strong>async/await</strong> &mdash; this means the server can handle reading the video stream, processing MQTT messages, and responding to WebSocket clients all at the same time without blocking. (2) Built-in <strong>WebSocket</strong> support for real-time video streaming at 15 FPS. (3) Automatic interactive API documentation at <code>/docs</code>. (4) <strong>Pydantic integration</strong> for automatic data validation. <strong>Why not Flask/Django?</strong> Flask is synchronous (handles one request at a time) and doesn't support WebSocket natively. Django is too heavy for a lightweight robot controller. FastAPI gives us async, WebSocket, and validation in one lightweight package. CPU-intensive work (YOLOv8 inference) is offloaded to a thread pool via <code>run_in_executor()</code> so it doesn't freeze the async event loop.</p>
+</details>
+
+<details class="viva">
+    <summary>Q11: How does the occupancy grid work?</summary>
+    <p>The occupancy grid is a <strong>2D bird's-eye-view representation</strong> of the environment. It's a 60×80 float array (3m × 4m, 5cm per cell) where each cell value represents the probability of an obstacle being present (0.0 = free, 1.0 = occupied). <strong>Building process:</strong> (1) Old grid values are decayed by 0.7× (temporal fading). (2) CV obstacle bounding box corners are projected from pixel space to world coordinates using inverse perspective mapping, then filled as polygons on the grid. (3) ML segmentation mask points are similarly projected. (4) Thin edges and floor anomalies are projected at low confidence (0.15-0.2). (5) A Gaussian inflation kernel (3×3) dilates obstacles for safety margin. The grid serves as input to the cost map generator.</p>
+</details>
+
+<details class="viva">
+    <summary>Q12: What is the role of the LLM (Large Language Model) in this system?</summary>
+    <p>The LLM serves as a <strong>fallback advisor, not the primary navigator</strong>. The primary navigation is handled by the local path planner (fast, ~2ms, no network). The LLM (Claude via VIO Cloud) is only queried when: (1) The local planner's confidence drops below 0.4, AND (2) The action is not STOP. The LLM query runs as a <strong>non-blocking background task</strong> — it never delays navigation. Results are cached for 10 seconds. If the cached LLM result has higher confidence than the local planner, it overrides the decision. This provides a "second opinion" for ambiguous scenarios while maintaining real-time responsiveness.</p>
+</details>
+
+<details class="viva">
+    <summary>Q13: Explain the ESP32-CAM hardware and the motor driver circuit.</summary>
+    <p>The <strong>ESP32-CAM</strong> (AI-Thinker module) has an ESP32-S chip, OV2640 camera, 4MB PSRAM, and WiFi. It runs at 240MHz with FreeRTOS dual-core. The camera captures VGA (640×480) JPEG frames using PSRAM double-buffering. The <strong>L293D motor driver</strong> controls two DC motors (left/right) for differential/tank steering. Each motor has 2 direction pins (IN1-IN4) and 1 PWM enable pin (ENA/ENB). PWM is generated using ESP32's LEDC (LED Control) peripheral at 1 kHz, 8-bit resolution (0-255 speed). GPIO pins: Motor A (left) = IN1:GPIO12, IN2:GPIO13, ENA:GPIO2; Motor B (right) = IN3:GPIO14, IN4:GPIO15, ENB:GPIO4. The MJPEG stream runs on Core 0 via FreeRTOS <code>xTaskCreatePinnedToCore()</code>.</p>
+</details>
+
+<details class="viva">
+    <summary>Q14: What is the difference between MANUAL and SEMI_AUTO modes?</summary>
+    <p>In <strong>MANUAL mode</strong>: The human operator directly controls the robot via dashboard buttons or keyboard. The AI decision engine runs but does not send commands. All detection and telemetry still display. In <strong>SEMI_AUTO mode</strong>: The AI decision engine autonomously controls the robot using the path planner. It uses pulse-based control (move → stop → analyze → decide → move). Human input is still accepted and takes priority — when a manual command is received, the AI pauses for 5 seconds (configurable) before resuming. The mode is toggled via the dashboard and transmitted via WebSocket.</p>
+</details>
+
+<details class="viva">
+    <summary>Q15: How does the cost map combine different factors?</summary>
+    <p>The cost map is a weighted sum of 5 components: (1) <strong>Occupancy (0.45):</strong> Direct obstacle presence. (2) <strong>Repulsive field (0.25):</strong> Gaussian decay around each obstacle's current position (σ=4 cells), scaled by confidence. (3) <strong>Predictive (0.15):</strong> Same repulsive fields but at predicted future positions (0.3s, 0.6s, 1.0s ahead) using Kalman velocity estimates, with time-decay weighting. (4) <strong>Boundary (0.05):</strong> Pre-computed static cost that increases near grid edges. (5) <strong>Attractive (0.10):</strong> Pre-computed static cost that decreases toward the forward-center of the grid (goal direction). Final cost is clipped to [0, 1]. This creates a <strong>potential field</strong> that the trajectory evaluator navigates through.</p>
+</details>
+
+<details class="viva">
+    <summary>Q16: What is WebSocket and how is it used differently from HTTP here?</summary>
+    <p><strong>Simple answer:</strong> WebSocket is like a phone call between the browser and the server &mdash; once connected, both sides can talk freely anytime. Normal HTTP is like sending letters (you send a request, get a response, done). WebSocket stays open so the server can push 15 video frames per second to your browser without the browser asking 15 times.</p>
+    <p><strong>Detailed answer:</strong> <strong>WebSocket</strong> is a full-duplex communication protocol over a single TCP connection. Unlike HTTP (request-response, connection closes after each exchange), WebSocket keeps the connection open for continuous bidirectional data flow. We use it for: (1) <strong>Video streaming</strong> (<code>/ws/video</code>) &mdash; the server pushes annotated video frames (base64-encoded JPEG) plus telemetry data at 15 FPS. Using HTTP, the browser would need to send 15 separate requests per second, each with headers &mdash; very wasteful. (2) <strong>Control channel</strong> (<code>/ws/control</code>) &mdash; bidirectional: the browser sends motor commands and mode switches, the server pushes AI decisions and detection alerts back. <strong>Backpressure:</strong> Each subscriber gets a queue (max 2 frames). If the browser is slow (e.g., processing a frame), the oldest frame is dropped so the user always sees the latest feed, not a delayed one.</p>
+</details>
+
+<details class="viva">
+    <summary>Q17: What is the optical flow algorithm and why is it useful?</summary>
+    <p><strong>Dense optical flow (Farneback method)</strong> computes the apparent motion of every pixel between two consecutive frames. It uses polynomial expansion to approximate the neighborhood of each pixel, then solves for the displacement vector. Parameters: pyramid scale 0.5, 3 levels, window size 15, 3 iterations. It's useful because: (1) It detects <strong>moving obstacles</strong> that might not be detected by static methods (e.g., a person walking toward the robot). (2) It provides <strong>motion magnitude</strong> at each pixel — pixels with flow above 2.0 px/frame are flagged as moving. (3) Combined with other detection methods, it improves overall reliability through multi-sensor fusion.</p>
+</details>
+
+<details class="viva">
+    <summary>Q18: How is the ESP32-CAM's MJPEG stream consumed by the backend?</summary>
+    <p>The ESP32 sends an MJPEG stream on port 81 as HTTP multipart content (<code>Content-Type: multipart/x-mixed-replace; boundary=frame</code>). The Python backend uses <code>httpx.AsyncClient</code> to stream this response. It reads chunks and looks for JPEG frame boundaries: start marker <code>0xFFD8</code> and end marker <code>0xFFD9</code>. Each complete JPEG is decoded using <code>cv2.imdecode()</code> into a NumPy array (BGR image). The latest frame is stored under an asyncio lock for thread safety. If the stream fails, it automatically falls back to the laptop webcam. This parsing happens in an async loop to avoid blocking other operations.</p>
+</details>
+
+<details class="viva">
+    <summary>Q19: What safety mechanisms does the system have?</summary>
+    <p>Multiple layers of safety: (1) <strong>Emergency stop</strong> — path planner immediately stops when obstacle < 0.25m in the forward corridor. (2) <strong>ESP32 auto-stop</strong> — firmware stops motors if no command received for 800ms (failsafe). (3) <strong>STOP bypasses voting</strong> — no delay in stopping (immediate safety override). (4) <strong>Pulse-based control</strong> — robot stops between movements to re-analyze the scene. (5) <strong>Multi-frame voting</strong> — prevents single-frame errors from causing wrong turns. (6) <strong>Trajectory feasibility check</strong> — rejects paths with cost > 0.9 or clearance < 8cm. (7) <strong>Recovery behavior</strong> — turns toward clearer side if all paths blocked for 5+ frames. (8) <strong>Manual override</strong> — human input always takes priority and pauses AI for 5 seconds.</p>
+</details>
+
+<details class="viva">
+    <summary>Q20: What is Pydantic and how is it used in this project?</summary>
+    <p><strong>Pydantic</strong> is a Python library for data validation using type annotations. It provides: (1) <strong>BaseModel</strong> — data classes with automatic validation, serialization (JSON), and type coercion. We use it for all data schemas: Detection, TrackedObstacle, LaneStatus, AIDecision, FrameResult, SystemTelemetry. (2) <strong>BaseSettings</strong> (from pydantic-settings) — loads configuration from environment variables and .env files with type validation. Our <code>Settings</code> class defines all configurable parameters with defaults. Benefits: type safety at runtime, automatic JSON serialization via <code>model_dump_json()</code>, clear data contracts between services, and self-documenting configuration.</p>
+</details>
+
+<details class="viva">
+    <summary>Q21: What is the difference between the occupancy grid and the cost map?</summary>
+    <p>The <strong>occupancy grid</strong> is a raw spatial representation: it shows WHERE obstacles are (binary-ish, 0.0–1.0 occupancy probability). The <strong>cost map</strong> adds intelligence: it shows how DESIRABLE each cell is for navigation. The cost map builds on the occupancy grid but adds: repulsive potential fields (stay away from obstacle neighborhoods), predictive costs (avoid where obstacles are heading), boundary costs (avoid edges), and attractive costs (prefer forward-center). Think of the occupancy grid as "what's there" and the cost map as "where should I go." The trajectory evaluator scores arcs against the cost map, not the raw occupancy grid.</p>
+</details>
+
+<details class="viva">
+    <summary>Q22: How does the system handle the Windows event loop issue with MQTT?</summary>
+    <p>Windows uses <code>ProactorEventLoop</code> by default, which is optimized for Windows I/O but doesn't support <code>add_reader()/add_writer()</code> socket operations needed by MQTT libraries (aiomqtt/paho-mqtt). The fix in <code>run.py</code>: (1) Create a <code>SelectorEventLoop</code> explicitly — this supports all socket operations. (2) Set it as the current event loop. (3) Use <code>uvicorn.Server</code> (not <code>uvicorn.run()</code>) and run it with <code>loop.run_until_complete()</code>. This ensures ALL async code — including MQTT, HTTP, WebSocket — runs in the SelectorEventLoop. On Linux/Mac, the default event loop works fine, so standard <code>asyncio.run()</code> is used.</p>
+</details>
+
+<details class="viva">
+    <summary>Q23: What is ByteTrack and why is it important for object tracking?</summary>
+    <p><strong>ByteTrack</strong> is a multi-object tracking algorithm that's unique because it uses <strong>both high and low confidence detections</strong> for association. Traditional trackers only use high-confidence detections, which can lose track of partially occluded objects. ByteTrack works in two steps: (1) First association — matches high-confidence detections to existing tracks using IoU (Intersection over Union). (2) Second association — matches remaining low-confidence detections to unmatched tracks. This recovers objects that might be temporarily obscured. In our system, ByteTrack provides persistent <code>track_id</code> values across frames, which the Kalman filter uses to maintain per-object state estimation.</p>
+</details>
+
+<details class="viva">
+    <summary>Q24: What are the key performance metrics of the system?</summary>
+    <p><strong>Frame rate:</strong> 15 FPS target for the processing pipeline. <strong>Path planner latency:</strong> ~2ms per frame. <strong>MJPEG stream:</strong> ~30 FPS from ESP32. <strong>Grid resolution:</strong> 5cm per cell (60×80 grid). <strong>Trajectory candidates:</strong> 45 evaluated per frame. <strong>Emergency stop distance:</strong> 0.25m. <strong>Safety zones:</strong> DANGER < 0.5m, CAUTION 0.5-1.2m, SAFE > 1.2m. <strong>YOLOv8:</strong> Configurable frame skip (every N frames). <strong>LLM query:</strong> ~2-8 seconds (background, cached 10s). <strong>MQTT QoS:</strong> Level 1 for motor commands (at-least-once). <strong>WebSocket:</strong> Queue maxsize 2 with backpressure drop.</p>
+</details>
+
+<details class="viva">
+    <summary>Q25: How would you improve this system in the future?</summary>
+    <p>Potential improvements: (1) <strong>SLAM (Simultaneous Localization and Mapping)</strong> — build a persistent map of the environment for global path planning. (2) <strong>GPU acceleration</strong> — move YOLOv8 to GPU or use TensorRT for faster inference. (3) <strong>Depth camera</strong> — replace perspective estimation with actual depth data (Intel RealSense / TOF sensor). (4) <strong>Multi-robot coordination</strong> — MQTT topics could support multiple DogBots. (5) <strong>Reinforcement Learning</strong> — train navigation policy end-to-end from camera to motor commands. (6) <strong>PWM speed control integration</strong> — use continuous steering/speed values directly instead of discrete FORWARD/LEFT/RIGHT. (7) <strong>Edge AI</strong> — run lightweight detection model directly on ESP32-S3 for lower latency.</p>
+</details>
+
+<hr>
+
+<p style="text-align: center; color: var(--dim); margin-top: 2rem;">
+    DogBot Recon System &mdash; KT Document | Generated for Viva Voce Preparation<br>
+    <span style="font-size: 0.85em;">Technologies: ESP32-CAM &bull; FastAPI &bull; OpenCV &bull; YOLOv8 &bull; Kalman Filter &bull; DWA Path Planning &bull; MQTT &bull; WebSocket</span>
+</p>
+
+</body>
+</html>
